@@ -4,11 +4,12 @@ import {
   onSnapshot, query, orderBy, serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase'
-import { Plus, Trash2, X } from 'lucide-react'
+import { Plus, Trash2, X, Edit2 } from 'lucide-react'
 import { PERSONEN, slug } from '../constants'
 
 const PRIORITY_ORDER = { hoch: 0, mittel: 1, niedrig: 2 }
 const PRIORITY_LABEL = { hoch: 'Hoch', mittel: 'Mittel', niedrig: 'Niedrig' }
+const FILTER_OPTIONS = ['Alle', ...PERSONEN]
 
 function sortTodos(todos) {
   return [...todos].sort((a, b) => {
@@ -17,14 +18,14 @@ function sortTodos(todos) {
   })
 }
 
-const FILTER_OPTIONS = ['Alle', ...PERSONEN]
-
 export default function TodoListe() {
   const [todos, setTodos] = useState([])
   const [filter, setFilter] = useState('Alle')
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel' })
+  const [editingId, setEditingId] = useState(null)
+  const [editForm, setEditForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel' })
 
   useEffect(() => {
     const q = query(collection(db, 'todos'), orderBy('createdAt', 'asc'))
@@ -42,15 +43,28 @@ export default function TodoListe() {
     e.preventDefault()
     if (!form.title.trim()) return
     await addDoc(collection(db, 'todos'), {
-      title: form.title.trim(),
-      person: form.person,
-      priority: form.priority,
-      done: false,
-      createdAt: serverTimestamp(),
-      doneAt: null,
+      title: form.title.trim(), person: form.person, priority: form.priority,
+      done: false, createdAt: serverTimestamp(), doneAt: null,
     })
     setForm({ title: '', person: form.person, priority: 'mittel' })
     setShowForm(false)
+  }
+
+  function startEdit(todo) {
+    setEditingId(todo.id)
+    setEditForm({ title: todo.title, person: todo.person, priority: todo.priority })
+    setShowForm(false)
+  }
+
+  async function handleEdit(e) {
+    e.preventDefault()
+    if (!editForm.title.trim()) return
+    await updateDoc(doc(db, 'todos', editingId), {
+      title: editForm.title.trim(),
+      person: editForm.person,
+      priority: editForm.priority,
+    })
+    setEditingId(null)
   }
 
   async function toggleDone(id, done) {
@@ -65,24 +79,17 @@ export default function TodoListe() {
     <div className="page">
       <div className="page-header">
         <h1>To-Do Liste</h1>
-        <button className="btn-icon" onClick={() => setShowForm(v => !v)}>
+        <button className="btn-icon" onClick={() => { setShowForm(v => !v); setEditingId(null) }}>
           {showForm ? <X size={22} /> : <Plus size={22} />}
         </button>
       </div>
 
       <div className="filter-tabs">
         {FILTER_OPTIONS.map(f => (
-          <button
-            key={f}
-            className={[
-              'filter-tab',
-              filter === f ? 'active' : '',
-              filter === f && f !== 'Alle' ? `${slug(f)}-tab` : '',
-            ].filter(Boolean).join(' ')}
-            onClick={() => setFilter(f)}
-          >
-            {f}
-            <span className="badge">{pendingCount(f)}</span>
+          <button key={f}
+            className={['filter-tab', filter === f ? 'active' : '', filter === f && f !== 'Alle' ? `${slug(f)}-tab` : ''].filter(Boolean).join(' ')}
+            onClick={() => setFilter(f)}>
+            {f}<span className="badge">{pendingCount(f)}</span>
           </button>
         ))}
       </div>
@@ -94,31 +101,20 @@ export default function TodoListe() {
             <button className="btn-icon-sm" onClick={() => setShowForm(false)}><X size={18} /></button>
           </div>
           <form onSubmit={handleAdd}>
-            <label>
-              Aufgabe
-              <input autoFocus value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="Was ist zu tun?" required />
-            </label>
-            <label>
-              Zugewiesen an
+            <label>Aufgabe<input autoFocus value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Was ist zu tun?" required /></label>
+            <label>Zugewiesen an
               <div className="person-select">
                 {PERSONEN.map(p => (
-                  <button key={p} type="button"
-                    className={`person-btn ${form.person === p ? `active chip-${slug(p)}` : ''}`}
-                    onClick={() => setForm(f => ({ ...f, person: p }))}
-                  >{p}</button>
+                  <button key={p} type="button" className={`person-btn ${form.person === p ? `active chip-${slug(p)}` : ''}`}
+                    onClick={() => setForm(f => ({ ...f, person: p }))}>{p}</button>
                 ))}
               </div>
             </label>
-            <label>
-              Priorität
+            <label>Priorität
               <div className="priority-select">
                 {['hoch', 'mittel', 'niedrig'].map(pr => (
-                  <button key={pr} type="button"
-                    className={`priority-btn ${form.priority === pr ? `active priority-${pr}` : ''}`}
-                    onClick={() => setForm(f => ({ ...f, priority: pr }))}
-                  >{PRIORITY_LABEL[pr]}</button>
+                  <button key={pr} type="button" className={`priority-btn ${form.priority === pr ? `active priority-${pr}` : ''}`}
+                    onClick={() => setForm(f => ({ ...f, priority: pr }))}>{PRIORITY_LABEL[pr]}</button>
                 ))}
               </div>
             </label>
@@ -133,34 +129,51 @@ export default function TodoListe() {
       <div className="todo-list">
         {loading && <div className="empty-state">Lädt…</div>}
         {!loading && filtered.length === 0 && (
-          <div className="empty-state">
-            Keine Aufgaben{filter !== 'Alle' ? ` für ${filter}` : ''}.<br />
-            Auf + drücken um eine hinzuzufügen.
-          </div>
+          <div className="empty-state">Keine Aufgaben{filter !== 'Alle' ? ` für ${filter}` : ''}.<br />Auf + drücken um eine hinzuzufügen.</div>
         )}
         {filtered.map(todo => (
-          <div key={todo.id} className={`todo-item card ${todo.done ? 'done' : ''}`}>
-            <button
-              className={`checkbox ${todo.done ? 'checked' : ''}`}
-              onClick={() => toggleDone(todo.id, todo.done)}
-            >
-              {todo.done && (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                  <polyline points="20,6 9,17 4,12" />
-                </svg>
-              )}
-            </button>
-            <div className="todo-content">
-              <span className="todo-title">{todo.title}</span>
-              <div className="todo-meta">
-                <span className={`person-chip chip-${slug(todo.person)}`}>{todo.person}</span>
-                <span className={`priority-badge priority-${todo.priority}`}>{PRIORITY_LABEL[todo.priority]}</span>
-              </div>
+          editingId === todo.id ? (
+            <div key={todo.id} className="card edit-inline-form">
+              <form onSubmit={handleEdit}>
+                <label>Aufgabe<input autoFocus value={editForm.title} onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))} required /></label>
+                <label>Zugewiesen an
+                  <div className="person-select">
+                    {PERSONEN.map(p => (
+                      <button key={p} type="button" className={`person-btn ${editForm.person === p ? `active chip-${slug(p)}` : ''}`}
+                        onClick={() => setEditForm(f => ({ ...f, person: p }))}>{p}</button>
+                    ))}
+                  </div>
+                </label>
+                <label>Priorität
+                  <div className="priority-select">
+                    {['hoch', 'mittel', 'niedrig'].map(pr => (
+                      <button key={pr} type="button" className={`priority-btn ${editForm.priority === pr ? `active priority-${pr}` : ''}`}
+                        onClick={() => setEditForm(f => ({ ...f, priority: pr }))}>{PRIORITY_LABEL[pr]}</button>
+                    ))}
+                  </div>
+                </label>
+                <div className="form-actions">
+                  <button type="button" className="btn-secondary" onClick={() => setEditingId(null)}>Abbrechen</button>
+                  <button type="submit" className="btn-primary">Speichern</button>
+                </div>
+              </form>
             </div>
-            <button className="btn-delete" onClick={() => handleDelete(todo.id)}>
-              <Trash2 size={16} />
-            </button>
-          </div>
+          ) : (
+            <div key={todo.id} className={`todo-item card ${todo.done ? 'done' : ''}`}>
+              <button className={`checkbox ${todo.done ? 'checked' : ''}`} onClick={() => toggleDone(todo.id, todo.done)}>
+                {todo.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20,6 9,17 4,12" /></svg>}
+              </button>
+              <div className="todo-content">
+                <span className="todo-title">{todo.title}</span>
+                <div className="todo-meta">
+                  <span className={`person-chip chip-${slug(todo.person)}`}>{todo.person}</span>
+                  <span className={`priority-badge priority-${todo.priority}`}>{PRIORITY_LABEL[todo.priority]}</span>
+                </div>
+              </div>
+              <button className="btn-edit" onClick={() => startEdit(todo)}><Edit2 size={15} /></button>
+              <button className="btn-delete" onClick={() => handleDelete(todo.id)}><Trash2 size={15} /></button>
+            </div>
+          )
         ))}
       </div>
     </div>

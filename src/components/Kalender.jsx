@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react'
 import {
-  collection, addDoc, deleteDoc, doc,
+  collection, addDoc, updateDoc, deleteDoc, doc,
   onSnapshot, query, orderBy, serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase'
-import { ChevronLeft, ChevronRight, Plus, X, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X, Trash2, Edit2 } from 'lucide-react'
 import { PERSONEN, slug } from '../constants'
 
 const WOCHENTAGE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
-const MONATE = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
-]
-
+const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 const BETRIFFT = [...PERSONEN, 'Beide']
+const EMPTY_FORM = { title: '', time: '', person: 'Beide' }
 
 function getCalendarDays(year, month) {
   const firstDay = new Date(year, month, 1)
@@ -34,8 +31,9 @@ export default function Kalender() {
   const [events, setEvents] = useState([])
   const [selectedDay, setSelectedDay] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ title: '', time: '', person: 'Beide' })
+  const [form, setForm] = useState(EMPTY_FORM)
 
   useEffect(() => {
     const q = query(collection(db, 'kalender'), orderBy('date', 'asc'))
@@ -63,18 +61,40 @@ export default function Kalender() {
       .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
   }
 
-  async function handleAdd(e) {
+  function openAddForm(day) {
+    setEditingId(null)
+    setForm(EMPTY_FORM)
+    setShowForm(true)
+  }
+
+  function openEditForm(ev) {
+    setEditingId(ev.id)
+    setForm({ title: ev.title, time: ev.time || '', person: ev.person })
+    setShowForm(true)
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault()
-    if (!form.title.trim() || !selectedDay) return
-    await addDoc(collection(db, 'kalender'), {
-      title: form.title.trim(),
-      date: dateStr(selectedDay),
-      time: form.time,
-      person: form.person,
-      createdAt: serverTimestamp(),
-    })
-    setForm({ title: '', time: '', person: 'Beide' })
+    if (!form.title.trim()) return
+    if (editingId) {
+      await updateDoc(doc(db, 'kalender', editingId), {
+        title: form.title.trim(),
+        time: form.time,
+        person: form.person,
+      })
+    } else {
+      if (!selectedDay) return
+      await addDoc(collection(db, 'kalender'), {
+        title: form.title.trim(),
+        date: dateStr(selectedDay),
+        time: form.time,
+        person: form.person,
+        createdAt: serverTimestamp(),
+      })
+    }
+    setForm(EMPTY_FORM)
     setShowForm(false)
+    setEditingId(null)
   }
 
   async function handleDelete(id) {
@@ -90,7 +110,7 @@ export default function Kalender() {
       <div className="page-header">
         <h1>Kalender</h1>
         {selectedDay && (
-          <button className="btn-icon" onClick={() => setShowForm(true)}>
+          <button className="btn-icon" onClick={() => openAddForm(selectedDay)}>
             <Plus size={22} />
           </button>
         )}
@@ -110,11 +130,9 @@ export default function Kalender() {
           const isToday = isThisMonth && day === now.getDate()
           const isSelected = selectedDay === day
           return (
-            <div
-              key={day}
+            <div key={day}
               className={['cal-day', isToday ? 'today' : '', isSelected && !isToday ? 'selected' : ''].filter(Boolean).join(' ')}
-              onClick={() => setSelectedDay(day === selectedDay ? null : day)}
-            >
+              onClick={() => setSelectedDay(day === selectedDay ? null : day)}>
               <span>{day}</span>
               {dayEvs.length > 0 && (
                 <div className="event-dots">
@@ -141,47 +159,35 @@ export default function Kalender() {
                 <strong>{ev.title}</strong>
                 {ev.time && <span className="event-time">{ev.time} Uhr</span>}
               </div>
-              <button className="btn-delete" onClick={() => handleDelete(ev.id)}>
-                <Trash2 size={16} />
-              </button>
+              <button className="btn-edit" onClick={() => openEditForm(ev)}><Edit2 size={15} /></button>
+              <button className="btn-delete" onClick={() => handleDelete(ev.id)}><Trash2 size={15} /></button>
             </div>
           ))}
         </div>
       )}
 
-      {showForm && selectedDay && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
+      {showForm && (
+        <div className="modal-overlay" onClick={() => { setShowForm(false); setEditingId(null) }}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Ereignis – {selectedDay}. {MONATE[month]}</h3>
-              <button className="btn-icon-sm" onClick={() => setShowForm(false)}><X size={20} /></button>
+              <h3>{editingId ? 'Ereignis bearbeiten' : `Ereignis – ${selectedDay}. ${MONATE[month]}`}</h3>
+              <button className="btn-icon-sm" onClick={() => { setShowForm(false); setEditingId(null) }}><X size={20} /></button>
             </div>
-            <form onSubmit={handleAdd}>
-              <label>
-                Titel
-                <input autoFocus value={form.title}
-                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                  placeholder="Ereignistitel" required />
-              </label>
-              <label>
-                Uhrzeit (optional)
-                <input type="time" value={form.time}
-                  onChange={e => setForm(f => ({ ...f, time: e.target.value }))} />
-              </label>
-              <label>
-                Betrifft
+            <form onSubmit={handleSubmit}>
+              <label>Titel<input autoFocus value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Ereignistitel" required /></label>
+              <label>Uhrzeit (optional)<input type="time" value={form.time} onChange={e => setForm(f => ({ ...f, time: e.target.value }))} /></label>
+              <label>Betrifft
                 <div className="person-select">
                   {BETRIFFT.map(p => (
                     <button key={p} type="button"
                       className={`person-btn ${form.person === p ? `active chip-${slug(p)}` : ''}`}
-                      onClick={() => setForm(f => ({ ...f, person: p }))}
-                    >{p}</button>
+                      onClick={() => setForm(f => ({ ...f, person: p }))}>{p}</button>
                   ))}
                 </div>
               </label>
               <div className="form-actions">
-                <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Abbrechen</button>
-                <button type="submit" className="btn-primary">Hinzufügen</button>
+                <button type="button" className="btn-secondary" onClick={() => { setShowForm(false); setEditingId(null) }}>Abbrechen</button>
+                <button type="submit" className="btn-primary">{editingId ? 'Speichern' : 'Hinzufügen'}</button>
               </div>
             </form>
           </div>

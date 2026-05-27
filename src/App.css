@@ -461,6 +461,33 @@ body {
 .entry-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; padding-right: 28px; }
 .entry-card .btn-delete { position: absolute; top: 10px; right: 8px; }
 
+.entry-actions {
+  position: absolute;
+  top: 8px;
+  right: 6px;
+  display: flex;
+  gap: 2px;
+}
+
+.btn-edit {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.12s, background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.btn-edit:hover, .btn-edit:active { color: var(--primary); background: var(--primary-light); }
+
+.edit-inline-form { padding: 12px 14px; }
+.edit-inline-form .form-actions { margin-top: 10px; }
+
 /* ── Statistik ────────────────────────────────── */
 .statistik-view { display: flex; flex-direction: column; gap: 14px; padding-bottom: 8px; }
 
