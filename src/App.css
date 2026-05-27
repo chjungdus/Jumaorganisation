@@ -46,17 +46,24 @@ html, body { height: 100%; overscroll-behavior: none; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 130% 55% at -5% -5%, rgba(168,85,247,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 50% at 108% 108%, rgba(0,212,255,0.20) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 45% at 108% -5%, rgba(255,45,146,0.14) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 60% at 50% 120%, rgba(168,85,247,0.10) 0%, transparent 50%),
+    #080810;
+  background-attachment: fixed;
   color: var(--text);
   font-size: 15px;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 #root {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  background: var(--bg);
+  background: transparent;
 }
 
 .app { min-height: 100vh; display: flex; flex-direction: column; }
@@ -77,10 +84,12 @@ body {
   width: 100%;
   max-width: 480px;
   height: var(--nav-height);
-  background: var(--card);
-  border-top: 1px solid var(--border-bright);
+  background: rgba(8,8,18,0.90);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.07);
   display: flex;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.6);
+  box-shadow: 0 -4px 32px rgba(0,0,0,0.7);
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -130,11 +139,13 @@ body {
 
 /* ── Cards ────────────────────────────────────── */
 .card {
-  background: var(--card);
+  background: rgba(14,14,26,0.80);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: var(--radius);
   padding: 14px;
-  border: 1px solid var(--border-bright);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.45);
 }
 
 /* ── Buttons ──────────────────────────────────── */
@@ -521,6 +532,37 @@ body {
 
 /* ── Säulendiagramm ───────────────────────────── */
 .saeulen-card { display: flex; flex-direction: column; gap: 12px; }
+
+.saeulen-header { display: flex; align-items: center; justify-content: space-between; }
+
+.chart-mode-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.chart-mode-btn {
+  padding: 4px 13px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chart-mode-btn.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid rgba(192,132,252,0.35);
+  text-shadow: 0 0 8px rgba(192,132,252,0.6);
+}
 
 .saeulen-chart {
   display: flex;

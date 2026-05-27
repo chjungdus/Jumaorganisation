@@ -36,23 +36,38 @@ function getWeekBounds() {
   return { monday, sunday }
 }
 
-function getLastWeekBounds() {
-  const { monday } = getWeekBounds()
-  const end = new Date(monday)
-  end.setDate(monday.getDate() - 1)
+function getCurrentMonthBounds() {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
   end.setHours(23, 59, 59, 999)
-  const start = new Date(end)
-  start.setDate(end.getDate() - 6)
-  start.setHours(0, 0, 0, 0)
   return { start, end }
 }
 
-function getLastMonthBounds() {
+function pad(n) { return String(n).padStart(2, '0') }
+
+function getCurrentWeekDays() {
+  const { monday } = getWeekBounds()
+  const LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    return { date: d.toISOString().split('T')[0], label: LABELS[i] }
+  })
+}
+
+function getCurrentMonthWeeks() {
   const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const end = new Date(now.getFullYear(), now.getMonth(), 0)
-  end.setHours(23, 59, 59, 999)
-  return { start, end }
+  const y = now.getFullYear()
+  const m = now.getMonth()
+  const lastDay = new Date(y, m + 1, 0).getDate()
+  const mm = pad(m + 1)
+  return [
+    { start: `${y}-${mm}-01`, end: `${y}-${mm}-07`, label: '1–7' },
+    { start: `${y}-${mm}-08`, end: `${y}-${mm}-14`, label: '8–14' },
+    { start: `${y}-${mm}-15`, end: `${y}-${mm}-21`, label: '15–21' },
+    { start: `${y}-${mm}-22`, end: `${y}-${mm}-${pad(lastDay)}`, label: `22–${lastDay}` },
+  ]
 }
 
 function inRange(dateStr, start, end) {
@@ -101,52 +116,53 @@ function CompCard({ label, h1, h2 }) {
 
 // ── Säulendiagramm ───────────────────────────────
 function Saeulendiagramm({ entries }) {
+  const [mode, setMode] = useState('woche')
   const p1 = PERSONEN[0]
   const p2 = PERSONEN[1]
-
-  const dateMap = {}
-  entries.forEach(e => {
-    if (!dateMap[e.date]) dateMap[e.date] = { [slug(p1)]: 0, [slug(p2)]: 0 }
-    const k = slug(e.person)
-    dateMap[e.date][k] = (dateMap[e.date][k] || 0) + calcHours(e.startTime, e.endTime)
-  })
-
-  const days = Object.keys(dateMap).sort().slice(-14)
-  const maxH = Math.max(...days.flatMap(d => [dateMap[d][slug(p1)], dateMap[d][slug(p2)]]), 0.5)
   const CHART_H = 120
 
-  if (days.length === 0) {
-    return <p className="no-data-chart">Noch keine Daten vorhanden</p>
-  }
+  const wocheData = getCurrentWeekDays().map(({ date, label }) => ({
+    label,
+    h1: entries.filter(e => e.person === p1 && e.date === date)
+      .reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
+    h2: entries.filter(e => e.person === p2 && e.date === date)
+      .reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
+  }))
+
+  const monatData = getCurrentMonthWeeks().map(({ start, end, label }) => ({
+    label,
+    h1: entries.filter(e => e.person === p1 && e.date >= start && e.date <= end)
+      .reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
+    h2: entries.filter(e => e.person === p2 && e.date >= start && e.date <= end)
+      .reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
+  }))
+
+  const data = mode === 'woche' ? wocheData : monatData
+  const maxH = Math.max(...data.flatMap(d => [d.h1, d.h2]), 0.5)
 
   return (
     <div className="saeulen-card card">
-      <div className="comp-card-title">Tagesverlauf</div>
+      <div className="saeulen-header">
+        <span className="comp-card-title">Säulendiagramm</span>
+        <div className="chart-mode-toggle">
+          <button className={`chart-mode-btn ${mode === 'woche' ? 'active' : ''}`} onClick={() => setMode('woche')}>Woche</button>
+          <button className={`chart-mode-btn ${mode === 'monat' ? 'active' : ''}`} onClick={() => setMode('monat')}>Monat</button>
+        </div>
+      </div>
       <div className="saeulen-chart">
-        {days.map(date => {
-          const d = dateMap[date]
-          const h1 = d[slug(p1)] || 0
-          const h2 = d[slug(p2)] || 0
-          const dateObj = new Date(date + 'T00:00:00')
-          const label = dateObj.toLocaleDateString('de-DE', { day: 'numeric', month: 'numeric' })
-          return (
-            <div key={date} className="saeulen-day">
-              <div className="saeulen-bars">
-                <div
-                  className={`saeulen-bar ${slug(p1)}`}
-                  style={{ height: `${Math.max((h1 / maxH) * CHART_H, h1 > 0 ? 3 : 0)}px` }}
-                  title={`${p1}: ${fmtHours(h1)}`}
-                />
-                <div
-                  className={`saeulen-bar ${slug(p2)}`}
-                  style={{ height: `${Math.max((h2 / maxH) * CHART_H, h2 > 0 ? 3 : 0)}px` }}
-                  title={`${p2}: ${fmtHours(h2)}`}
-                />
-              </div>
-              <div className="saeulen-day-label">{label}</div>
+        {data.map((d, i) => (
+          <div key={i} className="saeulen-day">
+            <div className="saeulen-bars">
+              <div className={`saeulen-bar ${slug(p1)}`}
+                style={{ height: `${Math.max((d.h1 / maxH) * CHART_H, d.h1 > 0 ? 4 : 0)}px` }}
+                title={`${p1}: ${fmtHours(d.h1)}`} />
+              <div className={`saeulen-bar ${slug(p2)}`}
+                style={{ height: `${Math.max((d.h2 / maxH) * CHART_H, d.h2 > 0 ? 4 : 0)}px` }}
+                title={`${p2}: ${fmtHours(d.h2)}`} />
             </div>
-          )
-        })}
+            <div className="saeulen-day-label">{d.label}</div>
+          </div>
+        ))}
       </div>
       <div className="chart-legend">
         <span className="legend-item"><span className={`legend-dot ${slug(p1)}`} />{p1}</span>
@@ -162,21 +178,20 @@ function StatistikView({ entries }) {
   const p2 = PERSONEN[1]
 
   const { monday, sunday } = getWeekBounds()
-  const { start: lwStart, end: lwEnd } = getLastWeekBounds()
-  const { start: lmStart, end: lmEnd } = getLastMonthBounds()
+  const { start: mStart, end: mEnd } = getCurrentMonthBounds()
 
-  const lwH1 = hoursForPerson(entries, p1, lwStart, lwEnd)
-  const lwH2 = hoursForPerson(entries, p2, lwStart, lwEnd)
-  const lmH1 = hoursForPerson(entries, p1, lmStart, lmEnd)
-  const lmH2 = hoursForPerson(entries, p2, lmStart, lmEnd)
+  const wH1 = hoursForPerson(entries, p1, monday, sunday)
+  const wH2 = hoursForPerson(entries, p2, monday, sunday)
+  const mH1 = hoursForPerson(entries, p1, mStart, mEnd)
+  const mH2 = hoursForPerson(entries, p2, mStart, mEnd)
   const totalH1 = entries.filter(e => e.person === p1).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0)
   const totalH2 = entries.filter(e => e.person === p2).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0)
 
   return (
     <div className="statistik-view">
       <div className="stat-section-title">Vergleich</div>
-      <CompCard label="Letzte Woche" h1={lwH1} h2={lwH2} />
-      <CompCard label="Letzter Monat" h1={lmH1} h2={lmH2} />
+      <CompCard label="Diese Woche" h1={wH1} h2={wH2} />
+      <CompCard label="Dieser Monat" h1={mH1} h2={mH2} />
       <CompCard label="Gesamt" h1={totalH1} h2={totalH2} />
       <div className="stat-section-title">Säulendiagramm</div>
       <Saeulendiagramm entries={entries} />
