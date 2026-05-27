@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Plus, Trash2, X } from 'lucide-react'
+import { PERSONEN, slug } from '../constants'
 
 const PRIORITY_ORDER = { hoch: 0, mittel: 1, niedrig: 2 }
 const PRIORITY_LABEL = { hoch: 'Hoch', mittel: 'Mittel', niedrig: 'Niedrig' }
@@ -12,18 +13,18 @@ const PRIORITY_LABEL = { hoch: 'Hoch', mittel: 'Mittel', niedrig: 'Niedrig' }
 function sortTodos(todos) {
   return [...todos].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1
-    const po = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
-    if (po !== 0) return po
-    return 0
+    return PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
   })
 }
+
+const FILTER_OPTIONS = ['Alle', ...PERSONEN]
 
 export default function TodoListe() {
   const [todos, setTodos] = useState([])
   const [filter, setFilter] = useState('Alle')
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ title: '', person: 'Matteo', priority: 'mittel' })
+  const [form, setForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel' })
 
   useEffect(() => {
     const q = query(collection(db, 'todos'), orderBy('createdAt', 'asc'))
@@ -34,12 +35,8 @@ export default function TodoListe() {
     return unsub
   }, [])
 
-  const filtered = sortTodos(
-    todos.filter(t => filter === 'Alle' || t.person === filter)
-  )
-
-  const pendingCount = (f) =>
-    todos.filter(t => !t.done && (f === 'Alle' || t.person === f)).length
+  const filtered = sortTodos(todos.filter(t => filter === 'Alle' || t.person === filter))
+  const pendingCount = f => todos.filter(t => !t.done && (f === 'Alle' || t.person === f)).length
 
   async function handleAdd(e) {
     e.preventDefault()
@@ -57,10 +54,7 @@ export default function TodoListe() {
   }
 
   async function toggleDone(id, done) {
-    await updateDoc(doc(db, 'todos', id), {
-      done: !done,
-      doneAt: !done ? serverTimestamp() : null,
-    })
+    await updateDoc(doc(db, 'todos', id), { done: !done, doneAt: !done ? serverTimestamp() : null })
   }
 
   async function handleDelete(id) {
@@ -77,13 +71,13 @@ export default function TodoListe() {
       </div>
 
       <div className="filter-tabs">
-        {['Alle', 'Matteo', 'Georgine'].map(f => (
+        {FILTER_OPTIONS.map(f => (
           <button
             key={f}
             className={[
               'filter-tab',
               filter === f ? 'active' : '',
-              filter === f && f !== 'Alle' ? `${f.toLowerCase()}-tab` : '',
+              filter === f && f !== 'Alle' ? `${slug(f)}-tab` : '',
             ].filter(Boolean).join(' ')}
             onClick={() => setFilter(f)}
           >
@@ -102,26 +96,18 @@ export default function TodoListe() {
           <form onSubmit={handleAdd}>
             <label>
               Aufgabe
-              <input
-                autoFocus
-                value={form.title}
+              <input autoFocus value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                placeholder="Was ist zu tun?"
-                required
-              />
+                placeholder="Was ist zu tun?" required />
             </label>
             <label>
               Zugewiesen an
               <div className="person-select">
-                {['Matteo', 'Georgine'].map(p => (
-                  <button
-                    key={p}
-                    type="button"
-                    className={`person-btn ${form.person === p ? `active chip-${p.toLowerCase()}` : ''}`}
+                {PERSONEN.map(p => (
+                  <button key={p} type="button"
+                    className={`person-btn ${form.person === p ? `active chip-${slug(p)}` : ''}`}
                     onClick={() => setForm(f => ({ ...f, person: p }))}
-                  >
-                    {p}
-                  </button>
+                  >{p}</button>
                 ))}
               </div>
             </label>
@@ -129,21 +115,15 @@ export default function TodoListe() {
               Priorität
               <div className="priority-select">
                 {['hoch', 'mittel', 'niedrig'].map(pr => (
-                  <button
-                    key={pr}
-                    type="button"
+                  <button key={pr} type="button"
                     className={`priority-btn ${form.priority === pr ? `active priority-${pr}` : ''}`}
                     onClick={() => setForm(f => ({ ...f, priority: pr }))}
-                  >
-                    {PRIORITY_LABEL[pr]}
-                  </button>
+                  >{PRIORITY_LABEL[pr]}</button>
                 ))}
               </div>
             </label>
             <div className="form-actions">
-              <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>
-                Abbrechen
-              </button>
+              <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Abbrechen</button>
               <button type="submit" className="btn-primary">Hinzufügen</button>
             </div>
           </form>
@@ -163,7 +143,6 @@ export default function TodoListe() {
             <button
               className={`checkbox ${todo.done ? 'checked' : ''}`}
               onClick={() => toggleDone(todo.id, todo.done)}
-              aria-label={todo.done ? 'Als offen markieren' : 'Als erledigt markieren'}
             >
               {todo.done && (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -174,10 +153,8 @@ export default function TodoListe() {
             <div className="todo-content">
               <span className="todo-title">{todo.title}</span>
               <div className="todo-meta">
-                <span className={`person-chip chip-${todo.person.toLowerCase()}`}>{todo.person}</span>
-                <span className={`priority-badge priority-${todo.priority}`}>
-                  {PRIORITY_LABEL[todo.priority]}
-                </span>
+                <span className={`person-chip chip-${slug(todo.person)}`}>{todo.person}</span>
+                <span className={`priority-badge priority-${todo.priority}`}>{PRIORITY_LABEL[todo.priority]}</span>
               </div>
             </div>
             <button className="btn-delete" onClick={() => handleDelete(todo.id)}>
