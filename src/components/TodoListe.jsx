@@ -23,9 +23,9 @@ export default function TodoListe() {
   const [filter, setFilter] = useState('Alle')
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [form, setForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel' })
+  const [form, setForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel', dueDate: '' })
   const [editingId, setEditingId] = useState(null)
-  const [editForm, setEditForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel' })
+  const [editForm, setEditForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel', dueDate: '' })
 
   useEffect(() => {
     const q = query(collection(db, 'todos'), orderBy('createdAt', 'asc'))
@@ -44,15 +44,16 @@ export default function TodoListe() {
     if (!form.title.trim()) return
     await addDoc(collection(db, 'todos'), {
       title: form.title.trim(), person: form.person, priority: form.priority,
+      dueDate: form.dueDate || '',
       done: false, createdAt: serverTimestamp(), doneAt: null,
     })
-    setForm({ title: '', person: form.person, priority: 'mittel' })
+    setForm({ title: '', person: form.person, priority: 'mittel', dueDate: '' })
     setShowForm(false)
   }
 
   function startEdit(todo) {
     setEditingId(todo.id)
-    setEditForm({ title: todo.title, person: todo.person, priority: todo.priority })
+    setEditForm({ title: todo.title, person: todo.person, priority: todo.priority, dueDate: todo.dueDate || '' })
     setShowForm(false)
   }
 
@@ -63,6 +64,7 @@ export default function TodoListe() {
       title: editForm.title.trim(),
       person: editForm.person,
       priority: editForm.priority,
+      dueDate: editForm.dueDate || '',
     })
     setEditingId(null)
   }
@@ -118,6 +120,7 @@ export default function TodoListe() {
                 ))}
               </div>
             </label>
+            <label>Fällig am (optional)<input type="date" value={form.dueDate} onChange={e => setForm(f => ({ ...f, dueDate: e.target.value }))} /></label>
             <div className="form-actions">
               <button type="button" className="btn-secondary" onClick={() => setShowForm(false)}>Abbrechen</button>
               <button type="submit" className="btn-primary">Hinzufügen</button>
@@ -152,6 +155,7 @@ export default function TodoListe() {
                     ))}
                   </div>
                 </label>
+                <label>Fällig am (optional)<input type="date" value={editForm.dueDate} onChange={e => setEditForm(f => ({ ...f, dueDate: e.target.value }))} /></label>
                 <div className="form-actions">
                   <button type="button" className="btn-secondary" onClick={() => setEditingId(null)}>Abbrechen</button>
                   <button type="submit" className="btn-primary">Speichern</button>
@@ -168,6 +172,11 @@ export default function TodoListe() {
                 <div className="todo-meta">
                   <span className={`person-chip chip-${slug(todo.person)}`}>{todo.person}</span>
                   <span className={`priority-badge priority-${todo.priority}`}>{PRIORITY_LABEL[todo.priority]}</span>
+                  {todo.dueDate && (
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600 }}>
+                      📅 {new Date(todo.dueDate + 'T00:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'short' })}
+                    </span>
+                  )}
                 </div>
               </div>
               <button className="btn-edit" onClick={() => startEdit(todo)}><Edit2 size={15} /></button>

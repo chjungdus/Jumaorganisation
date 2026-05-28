@@ -11,6 +11,7 @@ const WOCHENTAGE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
 const MONATE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 const BETRIFFT = [...PERSONEN, 'Beide']
 const EMPTY_FORM = { title: '', time: '', person: 'Beide' }
+const PRIORITY_LABEL = { hoch: 'Hoch', mittel: 'Mittel', niedrig: 'Niedrig' }
 
 function getCalendarDays(year, month) {
   const firstDay = new Date(year, month, 1)
@@ -29,18 +30,22 @@ export default function Kalender() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
   const [events, setEvents] = useState([])
+  const [todos, setTodos] = useState([])
   const [selectedDay, setSelectedDay] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(EMPTY_FORM)
 
   useEffect(() => {
     const q = query(collection(db, 'kalender'), orderBy('date', 'asc'))
-    const unsub = onSnapshot(q, snap => {
-      setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-      setLoading(false)
-    }, () => setLoading(false))
+    const unsub = onSnapshot(q, snap => setEvents(snap.docs.map(d => ({ id: d.id, ...d.data() }))))
+    return unsub
+  }, [])
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'todos'), snap =>
+      setTodos(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    )
     return unsub
   }, [])
 
@@ -61,7 +66,12 @@ export default function Kalender() {
       .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
   }
 
-  function openAddForm(day) {
+  function todosForDay(day) {
+    return todos.filter(t => t.dueDate === dateStr(day))
+      .sort((a, b) => ({ hoch: 0, mittel: 1, niedrig: 2 }[a.priority] - { hoch: 0, mittel: 1, niedrig: 2 }[b.priority]))
+  }
+
+  function openAddForm() {
     setEditingId(null)
     setForm(EMPTY_FORM)
     setShowForm(true)
@@ -78,18 +88,13 @@ export default function Kalender() {
     if (!form.title.trim()) return
     if (editingId) {
       await updateDoc(doc(db, 'kalender', editingId), {
-        title: form.title.trim(),
-        time: form.time,
-        person: form.person,
+        title: form.title.trim(), time: form.time, person: form.person,
       })
     } else {
       if (!selectedDay) return
       await addDoc(collection(db, 'kalender'), {
-        title: form.title.trim(),
-        date: dateStr(selectedDay),
-        time: form.time,
-        person: form.person,
-        createdAt: serverTimestamp(),
+        title: form.title.trim(), date: dateStr(selectedDay),
+        time: form.time, person: form.person, createdAt: serverTimestamp(),
       })
     }
     setForm(EMPTY_FORM)
@@ -97,20 +102,25 @@ export default function Kalender() {
     setEditingId(null)
   }
 
-  async function handleDelete(id) {
+  async function handleDeleteEvent(id) {
     await deleteDoc(doc(db, 'kalender', id))
+  }
+
+  async function toggleTodoDone(id, done) {
+    await updateDoc(doc(db, 'todos', id), { done: !done, doneAt: !done ? serverTimestamp() : null })
   }
 
   const calDays = getCalendarDays(year, month)
   const isThisMonth = month === now.getMonth() && year === now.getFullYear()
   const selectedEvents = selectedDay ? eventsForDay(selectedDay) : []
+  const selectedTodos = selectedDay ? todosForDay(selectedDay) : []
 
   return (
     <div className="page">
       <div className="page-header">
         <h1>Kalender</h1>
         {selectedDay && (
-          <button className="btn-icon" onClick={() => openAddForm(selectedDay)}>
+          <button className="btn-icon" onClick={openAddForm}>
             <Plus size={22} />
           </button>
         )}
@@ -127,6 +137,7 @@ export default function Kalender() {
         {calDays.map((day, i) => {
           if (day === null) return <div key={`e-${i}`} />
           const dayEvs = eventsForDay(day)
+          const dayTodos = todosForDay(day).filter(t => !t.done)
           const isToday = isThisMonth && day === now.getDate()
           const isSelected = selectedDay === day
           return (
@@ -134,10 +145,13 @@ export default function Kalender() {
               className={['cal-day', isToday ? 'today' : '', isSelected && !isToday ? 'selected' : ''].filter(Boolean).join(' ')}
               onClick={() => setSelectedDay(day === selectedDay ? null : day)}>
               <span>{day}</span>
-              {dayEvs.length > 0 && (
+              {(dayEvs.length > 0 || dayTodos.length > 0) && (
                 <div className="event-dots">
-                  {dayEvs.slice(0, 3).map((ev, idx) => (
-                    <span key={idx} className={`dot dot-${slug(ev.person)}`} />
+                  {dayEvs.slice(0, 2).map((ev, idx) => (
+                    <span key={`e${idx}`} className={`dot dot-${slug(ev.person)}`} />
+                  ))}
+                  {dayTodos.slice(0, 2).map((t, idx) => (
+                    <span key={`t${idx}`} className={`dot dot-todo-${t.priority}`} />
                   ))}
                 </div>
               )}
@@ -146,24 +160,51 @@ export default function Kalender() {
         })}
       </div>
 
-      {selectedDay && (
+      {selectedDay && (selectedEvents.length > 0 || selectedTodos.length > 0) && (
         <div className="day-events">
           <div className="day-events-header">{selectedDay}. {MONATE[month]} {year}</div>
-          {selectedEvents.length === 0 && (
-            <div className="empty-state small">Keine Ereignisse – auf + drücken um hinzuzufügen</div>
+
+          {selectedEvents.length > 0 && (
+            <>
+              {selectedTodos.length > 0 && <div className="day-section-title">Ereignisse</div>}
+              {selectedEvents.map(ev => (
+                <div key={ev.id} className={`event-item card person-border-${slug(ev.person)}`}>
+                  <div className="event-info">
+                    <span className={`person-chip chip-${slug(ev.person)}`}>{ev.person}</span>
+                    <strong>{ev.title}</strong>
+                    {ev.time && <span className="event-time">{ev.time} Uhr</span>}
+                  </div>
+                  <button className="btn-edit" onClick={() => openEditForm(ev)}><Edit2 size={15} /></button>
+                  <button className="btn-delete" onClick={() => handleDeleteEvent(ev.id)}><Trash2 size={15} /></button>
+                </div>
+              ))}
+            </>
           )}
-          {selectedEvents.map(ev => (
-            <div key={ev.id} className={`event-item card person-border-${slug(ev.person)}`}>
-              <div className="event-info">
-                <span className={`person-chip chip-${slug(ev.person)}`}>{ev.person}</span>
-                <strong>{ev.title}</strong>
-                {ev.time && <span className="event-time">{ev.time} Uhr</span>}
-              </div>
-              <button className="btn-edit" onClick={() => openEditForm(ev)}><Edit2 size={15} /></button>
-              <button className="btn-delete" onClick={() => handleDelete(ev.id)}><Trash2 size={15} /></button>
-            </div>
-          ))}
+
+          {selectedTodos.length > 0 && (
+            <>
+              <div className="day-section-title">Fällige Aufgaben</div>
+              {selectedTodos.map(todo => (
+                <div key={todo.id} className={`todo-event-item card priority-border-${todo.priority} ${todo.done ? 'done-item' : ''}`}>
+                  <button className={`checkbox ${todo.done ? 'checked' : ''}`} onClick={() => toggleTodoDone(todo.id, todo.done)}>
+                    {todo.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20,6 9,17 4,12" /></svg>}
+                  </button>
+                  <div className="todo-content">
+                    <span className="todo-title">{todo.title}</span>
+                    <div className="todo-meta">
+                      <span className={`person-chip chip-${slug(todo.person)}`}>{todo.person}</span>
+                      <span className={`priority-badge priority-${todo.priority}`}>{PRIORITY_LABEL[todo.priority]}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
+      )}
+
+      {selectedDay && selectedEvents.length === 0 && selectedTodos.length === 0 && (
+        <div className="empty-state small">Keine Ereignisse – auf + drücken um hinzuzufügen</div>
       )}
 
       {showForm && (
