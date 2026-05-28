@@ -4,13 +4,15 @@ import Arbeitszeiten from './components/Arbeitszeiten'
 import Kalender from './components/Kalender'
 import TodoListe from './components/TodoListe'
 import Notizen from './components/Notizen'
-import { Clock, Calendar, CheckSquare, FileText } from 'lucide-react'
+import Proteine from './components/Proteine'
+import { Clock, Calendar, CheckSquare, FileText, Dumbbell } from 'lucide-react'
 
 const TABS = [
   { id: 0, label: 'Arbeitszeiten', shortLabel: 'Zeiten', Icon: Clock, Component: Arbeitszeiten },
   { id: 1, label: 'Kalender', shortLabel: 'Kalender', Icon: Calendar, Component: Kalender },
   { id: 2, label: 'To-Do Liste', shortLabel: 'To-Do', Icon: CheckSquare, Component: TodoListe },
   { id: 3, label: 'Notizen', shortLabel: 'Notizen', Icon: FileText, Component: Notizen },
+  { id: 4, label: 'Proteine', shortLabel: 'Protein', Icon: Dumbbell, Component: Proteine },
 ]
 
 export default function App() {
