@@ -35,6 +35,7 @@ export default function Proteine() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState({ person: PERSONEN[0], amount: '', meal: '' })
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => {
     const q = query(collection(db, 'proteine'), orderBy('createdAt', 'asc'))
@@ -186,8 +187,18 @@ export default function Proteine() {
                   {entry.meal && <span className="protein-entry-meal">{entry.meal}</span>}
                 </div>
                 <div className="entry-actions">
-                  <button className="btn-edit" onClick={() => startEdit(entry)}><Edit2 size={15} /></button>
-                  <button className="btn-delete" onClick={() => handleDelete(entry.id)}><Trash2 size={15} /></button>
+                  {confirmDeleteId === entry.id ? (
+                    <div className="delete-confirm">
+                      <span className="delete-confirm-text">Löschen?</span>
+                      <button className="btn-confirm-yes" onClick={() => { setConfirmDeleteId(null); handleDelete(entry.id) }}>Ja</button>
+                      <button className="btn-confirm-no" onClick={() => setConfirmDeleteId(null)}>Nein</button>
+                    </div>
+                  ) : (
+                    <>
+                      <button className="btn-edit" onClick={() => startEdit(entry)}><Edit2 size={15} /></button>
+                      <button className="btn-delete" onClick={() => setConfirmDeleteId(entry.id)}><Trash2 size={15} /></button>
+                    </>
+                  )}
                 </div>
               </div>
             ))}

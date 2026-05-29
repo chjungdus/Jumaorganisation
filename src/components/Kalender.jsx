@@ -35,6 +35,7 @@ export default function Kalender() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => {
     const q = query(collection(db, 'kalender'), orderBy('date', 'asc'))
@@ -175,7 +176,15 @@ export default function Kalender() {
                     {ev.time && <span className="event-time">{ev.time} Uhr</span>}
                   </div>
                   <button className="btn-edit" onClick={() => openEditForm(ev)}><Edit2 size={15} /></button>
-                  <button className="btn-delete" onClick={() => handleDeleteEvent(ev.id)}><Trash2 size={15} /></button>
+                  {confirmDeleteId === ev.id ? (
+                    <div className="delete-confirm">
+                      <span className="delete-confirm-text">Löschen?</span>
+                      <button className="btn-confirm-yes" onClick={() => { setConfirmDeleteId(null); handleDeleteEvent(ev.id) }}>Ja</button>
+                      <button className="btn-confirm-no" onClick={() => setConfirmDeleteId(null)}>Nein</button>
+                    </div>
+                  ) : (
+                    <button className="btn-delete" onClick={() => setConfirmDeleteId(ev.id)}><Trash2 size={15} /></button>
+                  )}
                 </div>
               ))}
             </>

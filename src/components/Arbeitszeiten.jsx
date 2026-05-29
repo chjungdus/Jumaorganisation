@@ -189,6 +189,7 @@ export default function Arbeitszeiten() {
   const [form, setForm] = useState(EMPTY_FORM)
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState(EMPTY_FORM)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => {
     const q = query(collection(db, 'arbeitszeiten'), orderBy('date', 'desc'))
@@ -343,8 +344,18 @@ export default function Arbeitszeiten() {
                         </div>
                         {entry.description && <p className="entry-desc">{entry.description}</p>}
                         <div className="entry-actions">
-                          <button className="btn-edit" onClick={() => startEdit(entry)}><Edit2 size={15} /></button>
-                          <button className="btn-delete" onClick={() => handleDelete(entry.id)}><Trash2 size={15} /></button>
+                          {confirmDeleteId === entry.id ? (
+                            <div className="delete-confirm">
+                              <span className="delete-confirm-text">Löschen?</span>
+                              <button className="btn-confirm-yes" onClick={() => { setConfirmDeleteId(null); handleDelete(entry.id) }}>Ja</button>
+                              <button className="btn-confirm-no" onClick={() => setConfirmDeleteId(null)}>Nein</button>
+                            </div>
+                          ) : (
+                            <>
+                              <button className="btn-edit" onClick={() => startEdit(entry)}><Edit2 size={15} /></button>
+                              <button className="btn-delete" onClick={() => setConfirmDeleteId(entry.id)}><Trash2 size={15} /></button>
+                            </>
+                          )}
                         </div>
                       </div>
                     )

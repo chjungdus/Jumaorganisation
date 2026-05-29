@@ -26,6 +26,7 @@ export default function TodoListe() {
   const [form, setForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel', dueDate: '' })
   const [editingId, setEditingId] = useState(null)
   const [editForm, setEditForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel', dueDate: '' })
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   useEffect(() => {
     const q = query(collection(db, 'todos'), orderBy('createdAt', 'asc'))
@@ -180,7 +181,15 @@ export default function TodoListe() {
                 </div>
               </div>
               <button className="btn-edit" onClick={() => startEdit(todo)}><Edit2 size={15} /></button>
-              <button className="btn-delete" onClick={() => handleDelete(todo.id)}><Trash2 size={15} /></button>
+              {confirmDeleteId === todo.id ? (
+                <div className="delete-confirm">
+                  <span className="delete-confirm-text">Löschen?</span>
+                  <button className="btn-confirm-yes" onClick={() => { setConfirmDeleteId(null); handleDelete(todo.id) }}>Ja</button>
+                  <button className="btn-confirm-no" onClick={() => setConfirmDeleteId(null)}>Nein</button>
+                </div>
+              ) : (
+                <button className="btn-delete" onClick={() => setConfirmDeleteId(todo.id)}><Trash2 size={15} /></button>
+              )}
             </div>
           )
         ))}

@@ -114,6 +114,7 @@ export default function Notizen() {
 
 function NoteCard({ note, onDelete, onUpdate }) {
   const [editing, setEditing] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [title, setTitle] = useState(note.title)
   const [text, setText] = useState(note.text)
 
@@ -175,13 +176,17 @@ function NoteCard({ note, onDelete, onUpdate }) {
     <div className="note-card card" onClick={() => setEditing(true)}>
       <div className="note-header">
         <h3>{note.title}</h3>
-        <button
-          className="btn-delete"
-          onClick={e => { e.stopPropagation(); onDelete(note.id) }}
-          title="Notiz löschen"
-        >
-          <Trash2 size={16} />
-        </button>
+        {confirmDelete ? (
+          <div className="delete-confirm" onClick={e => e.stopPropagation()}>
+            <span className="delete-confirm-text">Löschen?</span>
+            <button className="btn-confirm-yes" onClick={e => { e.stopPropagation(); onDelete(note.id) }}>Ja</button>
+            <button className="btn-confirm-no" onClick={e => { e.stopPropagation(); setConfirmDelete(false) }}>Nein</button>
+          </div>
+        ) : (
+          <button className="btn-delete" onClick={e => { e.stopPropagation(); setConfirmDelete(true) }}>
+            <Trash2 size={16} />
+          </button>
+        )}
       </div>
       {note.text && <p className="note-text">{note.text}</p>}
       {updatedLabel && <span className="note-date">Zuletzt geändert: {updatedLabel}</span>}
