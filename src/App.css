@@ -331,6 +331,18 @@ body {
   box-shadow: 0 0 0 2px rgba(56,189,248,0.2);
 }
 
+.form-card input[type="checkbox"] {
+  -webkit-appearance: checkbox;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
 .form-card textarea { resize: vertical; }
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
