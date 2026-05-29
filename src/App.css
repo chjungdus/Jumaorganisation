@@ -1153,6 +1153,28 @@ body {
   .checkbox.checked { box-shadow: none !important; }
 }
 
+/* ── Rezepte ──────────────────────────────────── */
+.recipe-card { padding: 14px; cursor: default; }
+.recipe-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; cursor: pointer; }
+.recipe-header-left { flex: 1; min-width: 0; }
+.recipe-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.recipe-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 4px; }
+.recipe-badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 2px 8px;
+}
+.recipe-tag {
+  font-size: 11px; font-weight: 700; color: var(--primary);
+  background: var(--primary-light); border: 1px solid rgba(56,189,248,0.3);
+  border-radius: 10px; padding: 1px 8px;
+}
+.recipe-body { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; display: flex; flex-direction: column; gap: 14px; }
+.recipe-section { display: flex; flex-direction: column; gap: 6px; }
+.recipe-list { padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.recipe-list li { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+.recipe-steps li { font-size: 14px; color: var(--text); line-height: 1.6; }
+
 /* ── Empty state ──────────────────────────────── */
 .empty-state { text-align: center; color: var(--text-muted); padding: 36px 16px; font-size: 14px; line-height: 1.6; }
 .empty-state.small { padding: 14px 16px; }

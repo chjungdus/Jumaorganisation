@@ -7,7 +7,8 @@ import Notizen from './components/Notizen'
 import Makros from './components/Makros'
 import Trainingsplan from './components/Trainingsplan'
 import Tagesbuch from './components/Tagesbuch'
-import { Clock, Calendar, CheckSquare, FileText, Utensils, Dumbbell, BookOpen } from 'lucide-react'
+import Rezepte from './components/Rezepte'
+import { Clock, Calendar, CheckSquare, FileText, Utensils, Dumbbell, BookOpen, ChefHat } from 'lucide-react'
 
 const TABS = [
   { id: 0, label: 'Arbeitszeiten', shortLabel: 'Zeiten', Icon: Clock, Component: Arbeitszeiten },
@@ -17,6 +18,7 @@ const TABS = [
   { id: 4, label: 'Makros', shortLabel: 'Makros', Icon: Utensils, Component: Makros },
   { id: 5, label: 'Training', shortLabel: 'Training', Icon: Dumbbell, Component: Trainingsplan },
   { id: 6, label: 'Tagesbuch', shortLabel: 'Tagebuch', Icon: BookOpen, Component: Tagesbuch },
+  { id: 7, label: 'Rezepte', shortLabel: 'Rezepte', Icon: ChefHat, Component: Rezepte },
 ]
 
 export default function App() {
