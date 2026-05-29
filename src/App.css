@@ -472,12 +472,13 @@ body {
 .date-header > span:first-child { font-size: 13px; color: var(--text-secondary); font-weight: 600; text-transform: capitalize; }
 .date-total { font-weight: 800; color: var(--primary); font-size: 14px; text-shadow: 0 0 8px rgba(56,189,248,0.5); }
 
-.entry-card { position: relative; padding: 12px 14px; }
+.entry-card { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; }
+.entry-main { flex: 1; min-width: 0; }
 .entry-time { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 .entry-time span { font-size: 14px; font-weight: 600; }
 .entry-hours { color: var(--primary); font-weight: 800; text-shadow: 0 0 8px rgba(56,189,248,0.5); }
-.entry-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; padding-right: 28px; }
-.entry-card .btn-delete { position: absolute; top: 10px; right: 8px; }
+.entry-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.entry-actions-row { display: flex; gap: 2px; flex-shrink: 0; align-items: center; }
 
 .entry-actions {
   position: absolute;

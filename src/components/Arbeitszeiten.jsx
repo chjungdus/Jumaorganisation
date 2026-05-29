@@ -220,7 +220,7 @@ export default function Arbeitszeiten() {
 
   function startEdit(entry) {
     setEditingId(entry.id)
-    setEditForm({ date: entry.date, startTime: entry.startTime, endTime: entry.endTime, description: entry.description || '' })
+    setEditForm({ date: entry.date, startTime: entry.startTime, endTime: entry.endTime, description: entry.description || '', person: entry.person })
   }
 
   async function handleEdit(e) {
@@ -230,6 +230,7 @@ export default function Arbeitszeiten() {
       startTime: editForm.startTime,
       endTime: editForm.endTime,
       description: editForm.description.trim(),
+      person: editForm.person,
       hours: calcHours(editForm.startTime, editForm.endTime),
     })
     setEditingId(null)
@@ -324,6 +325,15 @@ export default function Arbeitszeiten() {
                     editingId === entry.id ? (
                       <div key={entry.id} className="card edit-inline-form">
                         <form onSubmit={handleEdit}>
+                          <label>Person
+                            <div className="person-select">
+                              {PERSONEN.map(p => (
+                                <button key={p} type="button"
+                                  className={`person-btn ${editForm.person === p ? `active chip-${slug(p)}` : ''}`}
+                                  onClick={() => setEditForm(f => ({ ...f, person: p }))}>{p}</button>
+                              ))}
+                            </div>
+                          </label>
                           <label>Datum<input type="date" value={editForm.date} onChange={e => setEditForm(f => ({ ...f, date: e.target.value }))} required /></label>
                           <div className="row">
                             <label>Von<input type="time" value={editForm.startTime} onChange={e => setEditForm(f => ({ ...f, startTime: e.target.value }))} required /></label>
@@ -338,25 +348,25 @@ export default function Arbeitszeiten() {
                       </div>
                     ) : (
                       <div key={entry.id} className="entry-card card">
-                        <div className="entry-time">
-                          <span>{entry.startTime} – {entry.endTime}</span>
-                          <span className="entry-hours">{fmtHours(calcHours(entry.startTime, entry.endTime))}</span>
+                        <div className="entry-main">
+                          <div className="entry-time">
+                            <span>{entry.startTime} – {entry.endTime}</span>
+                            <span className="entry-hours">{fmtHours(calcHours(entry.startTime, entry.endTime))}</span>
+                          </div>
+                          {entry.description && <p className="entry-desc">{entry.description}</p>}
                         </div>
-                        {entry.description && <p className="entry-desc">{entry.description}</p>}
-                        <div className="entry-actions">
-                          {confirmDeleteId === entry.id ? (
-                            <div className="delete-confirm">
-                              <span className="delete-confirm-text">Löschen?</span>
-                              <button className="btn-confirm-yes" onClick={() => { setConfirmDeleteId(null); handleDelete(entry.id) }}>Ja</button>
-                              <button className="btn-confirm-no" onClick={() => setConfirmDeleteId(null)}>Nein</button>
-                            </div>
-                          ) : (
-                            <>
-                              <button className="btn-edit" onClick={() => startEdit(entry)}><Edit2 size={15} /></button>
-                              <button className="btn-delete" onClick={() => setConfirmDeleteId(entry.id)}><Trash2 size={15} /></button>
-                            </>
-                          )}
-                        </div>
+                        {confirmDeleteId === entry.id ? (
+                          <div className="delete-confirm">
+                            <span className="delete-confirm-text">Löschen?</span>
+                            <button className="btn-confirm-yes" onClick={() => { setConfirmDeleteId(null); handleDelete(entry.id) }}>Ja</button>
+                            <button className="btn-confirm-no" onClick={() => setConfirmDeleteId(null)}>Nein</button>
+                          </div>
+                        ) : (
+                          <div className="entry-actions-row">
+                            <button className="btn-edit" onClick={() => startEdit(entry)}><Edit2 size={16} /></button>
+                            <button className="btn-delete" onClick={() => setConfirmDeleteId(entry.id)}><Trash2 size={16} /></button>
+                          </div>
+                        )}
                       </div>
                     )
                   ))}
