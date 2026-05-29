@@ -1002,6 +1002,70 @@ body {
 
 .protein-today-label { color: var(--primary) !important; font-weight: 800 !important; }
 
+/* ── Light Mode ───────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f0f4f8;
+    --bg2: #f8fafc;
+    --card: #ffffff;
+    --card2: #f0f4f8;
+    --text: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+    --border-bright: #cbd5e1;
+    --primary-light: rgba(56,189,248,0.12);
+    --mateo-light: rgba(0,212,255,0.10);
+    --zhuojun-light: rgba(255,45,146,0.10);
+    --beide-light: rgba(129,140,248,0.12);
+    --hoch-bg: rgba(255,50,80,0.08);
+    --mittel-bg: rgba(255,200,0,0.08);
+    --niedrig-bg: rgba(57,255,20,0.07);
+  }
+  body {
+    background:
+      radial-gradient(ellipse 55% 45% at 0% 0%, rgba(56,189,248,0.16) 0%, rgba(14,165,233,0.07) 35%, transparent 65%),
+      radial-gradient(ellipse 55% 45% at 100% 100%, rgba(56,189,248,0.16) 0%, rgba(14,165,233,0.07) 35%, transparent 65%),
+      radial-gradient(ellipse 40% 35% at 100% 0%, rgba(30,100,200,0.09) 0%, transparent 55%),
+      radial-gradient(ellipse 40% 35% at 0% 100%, rgba(30,100,200,0.09) 0%, transparent 55%),
+      #f0f4f8;
+  }
+  .card {
+    background: rgba(255,255,255,0.94);
+    border-color: rgba(0,0,0,0.06);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .bottom-nav {
+    background: rgba(248,250,252,0.97);
+    border-top-color: rgba(0,0,0,0.08);
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+  }
+  .nav-item { color: #94a3b8; }
+  .modal { background: #ffffff; border-color: rgba(0,0,0,0.08); }
+  .form-card input, .form-card textarea, .modal input, .modal textarea {
+    background: #f8fafc; color: #0f172a; border-color: #e2e8f0;
+  }
+  /* Remove neon glows in light mode */
+  .saeulen-bar.mateo, .saeulen-bar.zhuojun,
+  .comp-fill.mateo, .comp-fill.zhuojun,
+  .protein-fill.mateo, .protein-fill.zhuojun,
+  .dot-mateo, .dot-zhuojun, .dot-beide,
+  .dot-todo-hoch, .dot-todo-mittel, .dot-todo-niedrig,
+  .legend-dot.mateo, .legend-dot.zhuojun,
+  .cal-day.today,
+  .person-tab.active.mateo, .person-tab.active.zhuojun,
+  .person-btn.active.chip-mateo, .person-btn.active.chip-zhuojun,
+  .filter-tab.active.mateo-tab, .filter-tab.active.zhuojun-tab,
+  .btn-icon { box-shadow: none !important; }
+  .nav-item.active,
+  .comp-name.mateo, .comp-name.zhuojun,
+  .protein-name.mateo, .protein-name.zhuojun,
+  .protein-amount-big.mateo, .protein-amount-big.zhuojun,
+  .date-total, .entry-hours { text-shadow: none; }
+  .page-header h1 { -webkit-text-fill-color: initial; color: var(--primary); }
+  .checkbox.checked { box-shadow: none !important; }
+}
+
 /* ── Empty state ──────────────────────────────── */
 .empty-state { text-align: center; color: var(--text-muted); padding: 36px 16px; font-size: 14px; line-height: 1.6; }
 .empty-state.small { padding: 14px 16px; }
