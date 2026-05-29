@@ -12,6 +12,10 @@
   --zhuojun-light: rgba(255,45,146,0.12);
   --zhuojun-glow: 0 0 14px rgba(255,45,146,0.45);
 
+  --julius: #34d399;
+  --julius-light: rgba(52,211,153,0.12);
+  --julius-glow: 0 0 14px rgba(52,211,153,0.45);
+
   --beide: #818cf8;
   --beide-light: rgba(129,140,248,0.15);
 
@@ -293,6 +297,14 @@ body {
   text-shadow: 0 0 8px rgba(255,45,146,0.6);
 }
 
+.person-tab.active.julius {
+  border-color: var(--julius);
+  background: var(--julius-light);
+  color: var(--julius);
+  box-shadow: var(--julius-glow);
+  text-shadow: 0 0 8px rgba(52,211,153,0.6);
+}
+
 /* ── Forms ────────────────────────────────────── */
 .form-card h3, .form-header h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
 .form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -369,6 +381,12 @@ body {
   border-color: rgba(255,45,146,0.3);
 }
 
+.chip-julius {
+  background: var(--julius-light);
+  color: var(--julius);
+  border-color: rgba(52,211,153,0.3);
+}
+
 .chip-beide {
   background: var(--beide-light);
   color: var(--beide);
@@ -404,6 +422,13 @@ body {
   background: var(--zhuojun-light);
   color: var(--zhuojun);
   box-shadow: var(--zhuojun-glow);
+}
+
+.person-btn.active.chip-julius {
+  border-color: var(--julius);
+  background: var(--julius-light);
+  color: var(--julius);
+  box-shadow: var(--julius-glow);
 }
 
 .person-btn.active.chip-beide {
@@ -557,6 +582,7 @@ body {
 
 .comp-name.mateo { color: var(--mateo); text-shadow: 0 0 6px rgba(0,212,255,0.5); }
 .comp-name.zhuojun { color: var(--zhuojun); text-shadow: 0 0 6px rgba(255,45,146,0.5); }
+.comp-name.julius { color: var(--julius); text-shadow: 0 0 6px rgba(52,211,153,0.5); }
 
 .comp-track {
   flex: 1;
@@ -576,6 +602,7 @@ body {
 
 .comp-fill.mateo { background: var(--mateo); box-shadow: 0 0 8px rgba(0,212,255,0.6); }
 .comp-fill.zhuojun { background: var(--zhuojun); box-shadow: 0 0 8px rgba(255,45,146,0.6); }
+.comp-fill.julius { background: var(--julius); box-shadow: 0 0 8px rgba(52,211,153,0.6); }
 
 .comp-hours { font-size: 12px; font-weight: 700; width: 46px; text-align: right; flex-shrink: 0; color: var(--text); }
 
@@ -637,6 +664,7 @@ body {
 
 .saeulen-bar.mateo { background: var(--mateo); box-shadow: 0 0 8px rgba(0,212,255,0.5); }
 .saeulen-bar.zhuojun { background: var(--zhuojun); box-shadow: 0 0 8px rgba(255,45,146,0.5); }
+.saeulen-bar.julius { background: var(--julius); box-shadow: 0 0 8px rgba(52,211,153,0.5); }
 
 .saeulen-day-label { font-size: 10px; color: var(--text-muted); text-align: center; line-height: 1.2; }
 
@@ -647,6 +675,7 @@ body {
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .legend-dot.mateo { background: var(--mateo); box-shadow: 0 0 6px rgba(0,212,255,0.7); }
 .legend-dot.zhuojun { background: var(--zhuojun); box-shadow: 0 0 6px rgba(255,45,146,0.7); }
+.legend-dot.julius { background: var(--julius); box-shadow: 0 0 6px rgba(52,211,153,0.7); }
 
 .no-data-chart { text-align: center; color: var(--text-muted); font-size: 13px; padding: 24px 0; }
 
@@ -724,6 +753,7 @@ body {
 }
 .dot-mateo { background: var(--mateo); box-shadow: 0 0 4px rgba(0,212,255,0.8); }
 .dot-zhuojun { background: var(--zhuojun); box-shadow: 0 0 4px rgba(255,45,146,0.8); }
+.dot-julius { background: var(--julius); box-shadow: 0 0 4px rgba(52,211,153,0.8); }
 .dot-beide { background: var(--beide); box-shadow: 0 0 4px rgba(129,140,248,0.8); }
 .dot-todo-hoch { background: var(--hoch); box-shadow: 0 0 4px rgba(255,50,80,0.8); border-radius: 2px; }
 .dot-todo-mittel { background: var(--mittel); box-shadow: 0 0 4px rgba(255,200,0,0.8); border-radius: 2px; }
@@ -763,6 +793,7 @@ body {
 
 .person-border-mateo { border-left: 2px solid var(--mateo); box-shadow: inset 3px 0 8px rgba(0,212,255,0.1); }
 .person-border-zhuojun { border-left: 2px solid var(--zhuojun); box-shadow: inset 3px 0 8px rgba(255,45,146,0.1); }
+.person-border-julius { border-left: 2px solid var(--julius); box-shadow: inset 3px 0 8px rgba(52,211,153,0.1); }
 .person-border-beide { border-left: 2px solid var(--beide); box-shadow: inset 3px 0 8px rgba(129,140,248,0.1); }
 
 /* ── Modal ────────────────────────────────────── */
@@ -839,6 +870,13 @@ body {
   background: var(--zhuojun-light);
   color: var(--zhuojun);
   box-shadow: var(--zhuojun-glow);
+}
+
+.filter-tab.active.julius-tab {
+  border-color: var(--julius);
+  background: var(--julius-light);
+  color: var(--julius);
+  box-shadow: var(--julius-glow);
 }
 
 .badge {
@@ -1015,6 +1053,7 @@ body {
 
 .protein-fill.mateo { background: var(--mateo); box-shadow: 0 0 8px rgba(0,212,255,0.6); }
 .protein-fill.zhuojun { background: var(--zhuojun); box-shadow: 0 0 8px rgba(255,45,146,0.6); }
+.protein-fill.julius { background: var(--julius); box-shadow: 0 0 8px rgba(52,211,153,0.6); }
 
 .protein-pct { font-size: 11px; color: var(--text-muted); font-weight: 600; text-align: right; }
 
@@ -1241,6 +1280,7 @@ body {
 .dash-person-name { font-size: 18px; font-weight: 800; }
 .dash-person-name.mateo { color: var(--mateo); }
 .dash-person-name.zhuojun { color: var(--zhuojun); }
+.dash-person-name.julius { color: var(--julius); }
 .dash-mood { font-size: 22px; }
 .dash-macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
 .dash-macro-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 3px; }

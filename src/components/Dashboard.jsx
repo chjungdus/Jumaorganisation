@@ -12,6 +12,7 @@ function todayStr() {
 const GOALS = {
   'Mateo':    { kcal: 2500, protein: 115 },
   'Zhuo Jun': { kcal: 2200, protein: 105 },
+  'Julius':   { kcal: 2400, protein: 110 },
 }
 
 export default function Dashboard() {

@@ -10,8 +10,9 @@ import { PERSONEN, slug } from '../constants'
 const MEAL_CHIPS = ['Frühstück', 'Mittagessen', 'Abendessen', 'Snack', 'Shake', 'Post-Workout']
 
 const GOALS = {
-  'Mateo':     { kcal: 2500, protein: 115, carbs: 280, fat: 80 },
-  'Zhuo Jun':  { kcal: 2200, protein: 105, carbs: 245, fat: 70 },
+  'Mateo':    { kcal: 2500, protein: 115, carbs: 280, fat: 80 },
+  'Zhuo Jun': { kcal: 2200, protein: 105, carbs: 245, fat: 70 },
+  'Julius':   { kcal: 2400, protein: 110, carbs: 260, fat: 75 },
 }
 
 const MACRO_META = [
