@@ -1153,6 +1153,15 @@ body {
   .checkbox.checked { box-shadow: none !important; }
 }
 
+/* ── Note folders ─────────────────────────────── */
+.folder-tab { gap: 5px; }
+.folder-select { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.note-folder-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--text-muted); font-weight: 700;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 2px 7px;
+}
+
 /* ── Rezepte ──────────────────────────────────── */
 .recipe-card { padding: 14px; cursor: default; }
 .recipe-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; cursor: pointer; }
