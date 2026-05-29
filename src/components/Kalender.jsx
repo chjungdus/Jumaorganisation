@@ -80,6 +80,8 @@ export default function Kalender() {
   const [month, setMonth] = useState(now.getMonth())
   const [events, setEvents] = useState([])
   const [todos, setTodos] = useState([])
+  const [workouts, setWorkouts] = useState([])
+  const [makros, setMakros] = useState([])
   const [selectedDay, setSelectedDay] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -95,6 +97,20 @@ export default function Kalender() {
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'todos'), snap =>
       setTodos(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    )
+    return unsub
+  }, [])
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'training'), snap =>
+      setWorkouts(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    )
+    return unsub
+  }, [])
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'makros'), snap =>
+      setMakros(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     )
     return unsub
   }, [])
@@ -122,6 +138,18 @@ export default function Kalender() {
   function todosForDay(day) {
     return todos.filter(t => t.dueDate === dateStr(day))
       .sort((a, b) => ({ hoch: 0, mittel: 1, niedrig: 2 }[a.priority] - { hoch: 0, mittel: 1, niedrig: 2 }[b.priority]))
+  }
+
+  function workoutsForDay(day) {
+    return workouts.filter(w => w.date === dateStr(day))
+  }
+
+  function macroTotalsForDay(day, person) {
+    const entries = makros.filter(m => m.date === dateStr(day) && m.person === person)
+    return {
+      kcal: entries.reduce((s, m) => s + (m.kcal || 0), 0),
+      protein: entries.reduce((s, m) => s + (m.protein || 0), 0),
+    }
   }
 
   function openAddForm() {
@@ -162,6 +190,7 @@ export default function Kalender() {
   const isThisMonth = month === now.getMonth() && year === now.getFullYear()
   const selectedEvents = selectedDay ? eventsForDay(selectedDay) : []
   const selectedTodos = selectedDay ? todosForDay(selectedDay) : []
+  const selectedWorkouts = selectedDay ? workoutsForDay(selectedDay) : []
   const selectedFeiertag = selectedDay ? feiertage[dateStr(selectedDay)] : null
 
   return (
@@ -265,6 +294,42 @@ export default function Kalender() {
               ))}
             </>
           )}
+
+          {selectedWorkouts.length > 0 && (
+            <>
+              <div className="day-section-title">Training</div>
+              {selectedWorkouts.map(w => (
+                <div key={w.id} className={`card event-item person-border-${slug(w.person)}`}>
+                  <div className="event-info">
+                    <span className={`person-chip chip-${slug(w.person)}`}>{w.person}</span>
+                    <strong>{w.name}</strong>
+                    {w.duration && <span className="event-time">{w.duration} min</span>}
+                  </div>
+                  <span className={`dash-pill ${w.done ? 'pill-green' : 'pill-muted'}`} style={{ flexShrink: 0 }}>
+                    {w.done ? '✓' : 'Offen'}
+                  </span>
+                </div>
+              ))}
+            </>
+          )}
+
+          {(() => {
+            const macroRows = PERSONEN.map(p => ({ p, t: macroTotalsForDay(selectedDay, p) })).filter(x => x.t.kcal > 0)
+            if (!macroRows.length) return null
+            return (
+              <>
+                <div className="day-section-title">Makros</div>
+                <div className="card" style={{ padding: '10px 14px', display: 'flex', gap: 12 }}>
+                  {macroRows.map(({ p, t }) => (
+                    <div key={p} style={{ flex: 1 }}>
+                      <div className={`comp-name ${slug(p)}`} style={{ fontSize: 12, marginBottom: 4 }}>{p}</div>
+                      <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{t.kcal} kcal · {t.protein}g P</div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )
+          })()}
         </div>
       )}
 

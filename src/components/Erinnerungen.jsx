@@ -136,7 +136,11 @@ export default function Erinnerungen() {
       )}
 
       {upcoming.length === 0 && past.length === 0 && (
-        <div className="empty-state">Noch keine Erinnerungen.<br />Auf + drücken um eine zu erstellen.</div>
+        <div className="empty-state">
+          Noch keine Erinnerungen.
+          <br />
+          <button className="btn-primary" onClick={() => setShowForm(true)}>Erste Erinnerung erstellen</button>
+        </div>
       )}
 
       {upcoming.length > 0 && (

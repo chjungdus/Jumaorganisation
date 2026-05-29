@@ -131,7 +131,11 @@ export default function Notizen() {
       <div className="notes-grid">
         {loading && <div className="empty-state">Lädt…</div>}
         {!loading && visibleNotes.length === 0 && (
-          <div className="empty-state">Keine Notizen in «{activeFolder}».<br />Auf + drücken um eine zu erstellen.</div>
+          <div className="empty-state">
+            Keine Notizen in «{activeFolder}».
+            <br />
+            <button className="btn-primary" onClick={() => { setShowForm(true); setForm(f => ({ ...f, folder: activeFolder })) }}>Erste Notiz erstellen</button>
+          </div>
         )}
         {visibleNotes.map(note => (
           <NoteCard key={note.id} note={note} folders={folders} onDelete={handleDelete} onUpdate={handleUpdate} />

@@ -20,7 +20,10 @@ function sortTodos(todos) {
 
 export default function TodoListe() {
   const [todos, setTodos] = useState([])
-  const [filter, setFilter] = useState('Alle')
+  const [filter, setFilter] = useState(() => {
+    const saved = localStorage.getItem('lastActivePerson')
+    return (saved && PERSONEN.includes(saved)) ? saved : PERSONEN[0]
+  })
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ title: '', person: PERSONEN[0], priority: 'mittel', dueDate: '' })
@@ -39,6 +42,11 @@ export default function TodoListe() {
 
   const filtered = sortTodos(todos.filter(t => filter === 'Alle' || t.person === filter))
   const pendingCount = f => todos.filter(t => !t.done && (f === 'Alle' || t.person === f)).length
+
+  function handleFilterChange(f) {
+    setFilter(f)
+    if (PERSONEN.includes(f)) localStorage.setItem('lastActivePerson', f)
+  }
 
   async function handleAdd(e) {
     e.preventDefault()
@@ -91,7 +99,7 @@ export default function TodoListe() {
         {FILTER_OPTIONS.map(f => (
           <button key={f}
             className={['filter-tab', filter === f ? 'active' : '', filter === f && f !== 'Alle' ? `${slug(f)}-tab` : ''].filter(Boolean).join(' ')}
-            onClick={() => setFilter(f)}>
+            onClick={() => handleFilterChange(f)}>
             {f}<span className="badge">{pendingCount(f)}</span>
           </button>
         ))}
@@ -133,7 +141,11 @@ export default function TodoListe() {
       <div className="todo-list">
         {loading && <div className="empty-state">Lädt…</div>}
         {!loading && filtered.length === 0 && (
-          <div className="empty-state">Keine Aufgaben{filter !== 'Alle' ? ` für ${filter}` : ''}.<br />Auf + drücken um eine hinzuzufügen.</div>
+          <div className="empty-state">
+            Keine Aufgaben{filter !== 'Alle' ? ` für ${filter}` : ''}.
+            <br />
+            <button className="btn-primary" onClick={() => setShowForm(true)}>Erste Aufgabe erstellen</button>
+          </div>
         )}
         {filtered.map(todo => (
           editingId === todo.id ? (
