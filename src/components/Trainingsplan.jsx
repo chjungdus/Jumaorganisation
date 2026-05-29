@@ -54,7 +54,7 @@ function ExerciseInput({ exercises, onChange }) {
   )
 }
 
-function WorkoutCard({ workout, onDelete, onToggleDone, onEdit }) {
+function WorkoutCard({ workout, onDelete, onToggleDone, onEdit, onToggleExercise }) {
   const [expanded, setExpanded] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   return (
@@ -92,7 +92,13 @@ function WorkoutCard({ workout, onDelete, onToggleDone, onEdit }) {
         <div className="workout-exercises">
           {workout.exercises.map((ex, i) => (
             <div key={i} className="workout-exercise-row">
-              <span className="workout-ex-name">{ex.name || '—'}</span>
+              <button
+                className={`checkbox ${ex.done ? 'checked' : ''}`}
+                onClick={() => onToggleExercise(workout.id, i, workout.exercises)}
+              >
+                {ex.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20,6 9,17 4,12" /></svg>}
+              </button>
+              <span className={`workout-ex-name${ex.done ? ' workout-ex-done' : ''}`}>{ex.name || '—'}</span>
               <span className="workout-ex-info">{ex.sets}×{ex.reps}{ex.weight ? ` · ${ex.weight}kg` : ''}</span>
             </div>
           ))}
@@ -151,6 +157,13 @@ export default function Trainingsplan() {
 
   async function toggleDone(id, done) {
     await updateDoc(doc(db, 'training', id), { done: !done })
+  }
+
+  async function toggleExercise(workoutId, exerciseIndex, exercises) {
+    const updated = exercises.map((ex, i) =>
+      i === exerciseIndex ? { ...ex, done: !ex.done } : ex
+    )
+    await updateDoc(doc(db, 'training', workoutId), { exercises: updated })
   }
 
   function startEdit(w) {
@@ -224,7 +237,7 @@ export default function Trainingsplan() {
             <div className="empty-state small">Noch kein Workout heute — auf + drücken oder eine Vorlage wählen</div>
           )}
           {todayWorkouts.map(w => (
-            <WorkoutCard key={w.id} workout={w} onDelete={handleDelete} onToggleDone={toggleDone} onEdit={startEdit} />
+            <WorkoutCard key={w.id} workout={w} onDelete={handleDelete} onToggleDone={toggleDone} onEdit={startEdit} onToggleExercise={toggleExercise} />
           ))}
         </>
       )}
@@ -233,7 +246,7 @@ export default function Trainingsplan() {
         <>
           {pastWorkouts.length === 0 && <div className="empty-state">Noch keine vergangenen Workouts.</div>}
           {pastWorkouts.map(w => (
-            <WorkoutCard key={w.id} workout={w} onDelete={handleDelete} onToggleDone={toggleDone} onEdit={startEdit} />
+            <WorkoutCard key={w.id} workout={w} onDelete={handleDelete} onToggleDone={toggleDone} onEdit={startEdit} onToggleExercise={toggleExercise} />
           ))}
         </>
       )}

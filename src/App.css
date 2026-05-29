@@ -1091,6 +1091,16 @@ body {
 .btn-add-exercise { background: none; border: 1px dashed var(--border-bright); color: var(--text-muted); border-radius: 8px; padding: 8px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 2px; -webkit-tap-highlight-color: transparent; }
 .btn-add-exercise:hover { border-color: var(--primary); color: var(--primary); }
 
+/* Override .form-card input width:100% for exercise row inputs */
+.exercise-row input { width: auto !important; -webkit-appearance: none; }
+.exercise-row .ex-name { flex: 1 !important; min-width: 0; }
+.exercise-row .ex-num { width: 44px !important; }
+.exercise-row .ex-weight { width: 52px !important; }
+
+.workout-ex-done { text-decoration: line-through; opacity: 0.5; }
+.workout-exercise-row .checkbox { width: 20px; height: 20px; border-radius: 5px; flex-shrink: 0; }
+.workout-exercise-row .checkbox svg { width: 11px; height: 11px; }
+
 .vorlage-card { cursor: pointer; transition: border-color 0.15s; }
 .vorlage-card:hover { border-color: var(--primary); }
 .vorlage-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }

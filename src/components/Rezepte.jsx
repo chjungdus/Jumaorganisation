@@ -9,6 +9,58 @@ import { PERSONEN, slug } from '../constants'
 
 const TAG_OPTIONS = ['Muskelaufbau', 'Schnell', 'Proteinreich', 'Vegetarisch', 'Frühstück', 'Meal Prep']
 
+const PRESET_REZEPTE = [
+  {
+    title: 'Hähnchen mit Reis & Brokkoli',
+    person: 'Beide', time: 30, servings: 2, protein: 48, kcal: 520,
+    tags: ['Muskelaufbau', 'Proteinreich', 'Meal Prep'],
+    ingredients: ['300g Hähnchenbrustfilet', '150g Langkornreis (roh)', '200g Brokkoli', '1 EL Olivenöl', 'Salz, Pfeffer, Paprikapulver'],
+    steps: ['Reis nach Packungsanleitung kochen.', 'Hähnchen in Streifen schneiden, mit Gewürzen marinieren.', 'Öl erhitzen, Hähnchen 6–8 Min. anbraten.', 'Brokkoli 5 Min. blanchieren.', 'Alles zusammen servieren.'],
+  },
+  {
+    title: 'Proteinshake mit Haferflocken',
+    person: 'Beide', time: 5, servings: 1, protein: 35, kcal: 450,
+    tags: ['Muskelaufbau', 'Proteinreich', 'Frühstück', 'Schnell'],
+    ingredients: ['1 Portion Proteinpulver (Vanille)', '60g Haferflocken', '300ml Vollmilch', '1 Banane', '1 EL Erdnussbutter'],
+    steps: ['Alle Zutaten in einen Mixer geben.', '30 Sekunden mixen.', 'Sofort trinken.'],
+  },
+  {
+    title: 'Rührei mit Avocado & Vollkorntoast',
+    person: 'Beide', time: 10, servings: 1, protein: 28, kcal: 480,
+    tags: ['Proteinreich', 'Frühstück', 'Schnell'],
+    ingredients: ['4 Eier', '1 Avocado', '2 Scheiben Vollkorntoast', 'Salz, Pfeffer', 'Etwas Butter'],
+    steps: ['Eier verquirlen, salzen und pfeffern.', 'Butter in Pfanne erhitzen, Eier bei niedriger Hitze stocken lassen.', 'Avocado in Scheiben schneiden.', 'Toast toasten und mit Rührei und Avocado belegen.'],
+  },
+  {
+    title: 'Thunfisch-Pasta',
+    person: 'Beide', time: 20, servings: 2, protein: 42, kcal: 580,
+    tags: ['Muskelaufbau', 'Proteinreich', 'Schnell'],
+    ingredients: ['200g Pasta', '2 Dosen Thunfisch (in Wasser)', '1 Dose gehackte Tomaten', '1 Zwiebel', '2 Knoblauchzehen', 'Olivenöl, Salz, Pfeffer, Basilikum'],
+    steps: ['Pasta kochen.', 'Zwiebel und Knoblauch in Öl anbraten.', 'Tomaten dazugeben, 5 Min. köcheln.', 'Abgetropften Thunfisch einrühren.', 'Mit Pasta vermengen und abschmecken.'],
+  },
+  {
+    title: 'Lachs mit Süßkartoffel',
+    person: 'Beide', time: 35, servings: 2, protein: 44, kcal: 560,
+    tags: ['Muskelaufbau', 'Proteinreich'],
+    ingredients: ['2 Lachsfilets (à 150g)', '400g Süßkartoffeln', '1 Zitrone', '1 EL Olivenöl', 'Salz, Pfeffer, Knoblauchpulver'],
+    steps: ['Süßkartoffeln würfeln, bei 200°C 25 Min. backen.', 'Lachs mit Öl, Zitronensaft und Gewürzen marinieren.', 'Lachs in Pfanne je 4 Min. pro Seite braten.', 'Mit Süßkartoffeln servieren.'],
+  },
+  {
+    title: 'Griechisches Joghurt mit Granola',
+    person: 'Beide', time: 5, servings: 1, protein: 22, kcal: 350,
+    tags: ['Frühstück', 'Proteinreich', 'Schnell', 'Vegetarisch'],
+    ingredients: ['250g Griechisches Joghurt (10%)', '40g Granola', '100g gemischte Beeren', '1 EL Honig'],
+    steps: ['Joghurt in eine Schüssel geben.', 'Mit Granola und Beeren toppen.', 'Mit Honig beträufeln.'],
+  },
+  {
+    title: 'Quark mit Früchten & Nüssen',
+    person: 'Beide', time: 5, servings: 1, protein: 26, kcal: 380,
+    tags: ['Frühstück', 'Proteinreich', 'Schnell', 'Vegetarisch'],
+    ingredients: ['250g Magerquark', '100g gemischte Früchte', '30g Walnüsse', '1 EL Honig', '1 TL Zimt'],
+    steps: ['Quark in eine Schüssel geben.', 'Früchte darüber verteilen.', 'Mit Nüssen, Honig und Zimt garnieren.'],
+  },
+]
+
 const EMPTY_FORM = {
   title: '', person: 'Beide', time: '', servings: '',
   protein: '', kcal: '',
@@ -99,12 +151,63 @@ function RecipeCard({ recipe, onDelete, onEdit }) {
   )
 }
 
+function PresetRecipeCard({ recipe, onAdd }) {
+  const [expanded, setExpanded] = useState(false)
+  return (
+    <div className="card recipe-card">
+      <div className="recipe-header" onClick={() => setExpanded(v => !v)}>
+        <div className="recipe-header-left">
+          <div className="recipe-title">{recipe.title}</div>
+          <div className="recipe-meta">
+            {recipe.time && <span className="recipe-badge"><Clock size={10} /> {recipe.time} min</span>}
+            {recipe.servings && <span className="recipe-badge"><Users size={10} /> {recipe.servings} Port.</span>}
+            {recipe.protein && <span className="recipe-badge">{recipe.protein}g P</span>}
+            {recipe.kcal && <span className="recipe-badge">{recipe.kcal} kcal</span>}
+          </div>
+          {recipe.tags?.length > 0 && (
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+              {recipe.tags.map(t => <span key={t} className="recipe-tag">{t}</span>)}
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+          {expanded ? <ChevronUp size={16} color="var(--text-muted)" /> : <ChevronDown size={16} color="var(--text-muted)" />}
+        </div>
+      </div>
+      {expanded && (
+        <div className="recipe-body">
+          {recipe.ingredients?.length > 0 && (
+            <div className="recipe-section">
+              <div className="tb-label">Zutaten</div>
+              <ul className="recipe-list">
+                {recipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+              </ul>
+            </div>
+          )}
+          {recipe.steps?.length > 0 && (
+            <div className="recipe-section">
+              <div className="tb-label">Zubereitung</div>
+              <ol className="recipe-list recipe-steps">
+                {recipe.steps.map((s, i) => <li key={i}>{s}</li>)}
+              </ol>
+            </div>
+          )}
+          <button className="btn-primary" style={{ width: '100%' }} onClick={e => { e.stopPropagation(); onAdd() }}>
+            + Zu meinen Rezepten hinzufügen
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Rezepte() {
   const [recipes, setRecipes] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [filter, setFilter] = useState('Alle')
+  const [view, setView] = useState('meine')
 
   useEffect(() => {
     const q = query(collection(db, 'rezepte'), orderBy('createdAt', 'desc'))
@@ -165,22 +268,34 @@ export default function Rezepte() {
     }))
   }
 
+  async function savePreset(r) {
+    await addDoc(collection(db, 'rezepte'), { ...r, createdAt: serverTimestamp() })
+    setView('meine')
+  }
+
   return (
     <div className="page">
       <div className="page-header">
         <h1>Rezepte</h1>
-        <button className="btn-icon" onClick={() => { setShowForm(v => !v); setEditingId(null); setForm(EMPTY_FORM) }}>
+        <button className="btn-icon" onClick={() => { setShowForm(v => !v); setEditingId(null); setForm(EMPTY_FORM); setView('meine') }}>
           {showForm ? <X size={22} /> : <Plus size={22} />}
         </button>
       </div>
 
-      <div className="filter-tabs">
-        {FILTERS.map(f => (
-          <button key={f}
-            className={['filter-tab', filter === f ? 'active' : '', filter === f && f !== 'Alle' ? `${slug(f)}-tab` : ''].filter(Boolean).join(' ')}
-            onClick={() => setFilter(f)}>{f}</button>
-        ))}
+      <div className="view-toggle">
+        <button className={`view-toggle-btn ${view === 'meine' ? 'active' : ''}`} onClick={() => { setView('meine'); setShowForm(false) }}>Meine</button>
+        <button className={`view-toggle-btn ${view === 'vorlagen' ? 'active' : ''}`} onClick={() => { setView('vorlagen'); setShowForm(false) }}>Vorlagen</button>
       </div>
+
+      {view === 'meine' && (
+        <div className="filter-tabs">
+          {FILTERS.map(f => (
+            <button key={f}
+              className={['filter-tab', filter === f ? 'active' : '', filter === f && f !== 'Alle' ? `${slug(f)}-tab` : ''].filter(Boolean).join(' ')}
+              onClick={() => setFilter(f)}>{f}</button>
+          ))}
+        </div>
+      )}
 
       {showForm && (
         <div className="card form-card">
@@ -231,14 +346,24 @@ export default function Rezepte() {
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {filtered.length === 0 && (
-          <div className="empty-state">Noch keine Rezepte.<br />Auf + drücken um ein Rezept hinzuzufügen.</div>
-        )}
-        {filtered.map(r => (
-          <RecipeCard key={r.id} recipe={r} onDelete={handleDelete} onEdit={startEdit} />
-        ))}
-      </div>
+      {view === 'meine' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {filtered.length === 0 && (
+            <div className="empty-state">Noch keine Rezepte.<br />Auf + drücken oder Vorlagen nutzen.</div>
+          )}
+          {filtered.map(r => (
+            <RecipeCard key={r.id} recipe={r} onDelete={handleDelete} onEdit={startEdit} />
+          ))}
+        </div>
+      )}
+
+      {view === 'vorlagen' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {PRESET_REZEPTE.map((r, i) => (
+            <PresetRecipeCard key={i} recipe={r} onAdd={() => savePreset(r)} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
