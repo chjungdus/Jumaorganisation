@@ -5,7 +5,8 @@ import Kalender from './components/Kalender'
 import TodoListe from './components/TodoListe'
 import Notizen from './components/Notizen'
 import Makros from './components/Makros'
-import { Clock, Calendar, CheckSquare, FileText, Utensils } from 'lucide-react'
+import Trainingsplan from './components/Trainingsplan'
+import { Clock, Calendar, CheckSquare, FileText, Utensils, Dumbbell } from 'lucide-react'
 
 const TABS = [
   { id: 0, label: 'Arbeitszeiten', shortLabel: 'Zeiten', Icon: Clock, Component: Arbeitszeiten },
@@ -13,6 +14,7 @@ const TABS = [
   { id: 2, label: 'To-Do Liste', shortLabel: 'To-Do', Icon: CheckSquare, Component: TodoListe },
   { id: 3, label: 'Notizen', shortLabel: 'Notizen', Icon: FileText, Component: Notizen },
   { id: 4, label: 'Makros', shortLabel: 'Makros', Icon: Utensils, Component: Makros },
+  { id: 5, label: 'Training', shortLabel: 'Training', Icon: Dumbbell, Component: Trainingsplan },
 ]
 
 export default function App() {

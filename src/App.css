@@ -89,13 +89,16 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid rgba(255,255,255,0.07);
   display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
   box-shadow: 0 -4px 32px rgba(0,0,0,0.7);
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom);
 }
+.bottom-nav::-webkit-scrollbar { display: none; }
 
 .nav-item {
-  flex: 1;
+  flex: 0 0 72px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1020,6 +1023,36 @@ body {
 }
 
 .protein-week-totals { border-top: 1px solid var(--border); padding-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ── Training ─────────────────────────────────── */
+.workout-card { padding: 14px; }
+.workout-done { opacity: 0.55; }
+.workout-header { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.workout-header-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.workout-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.workout-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.workout-date { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.workout-duration { font-size: 11px; color: var(--primary); font-weight: 700; background: var(--primary-light); padding: 1px 7px; border-radius: 10px; }
+.workout-exercises { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.workout-exercise-row { display: flex; justify-content: space-between; align-items: center; }
+.workout-ex-name { font-size: 14px; color: var(--text); }
+.workout-ex-info { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+.workout-notes { font-size: 13px; color: var(--text-secondary); margin-top: 8px; font-style: italic; }
+
+.exercise-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.exercise-row { display: flex; align-items: center; gap: 5px; }
+.ex-name { flex: 1; min-width: 0; border: 1px solid var(--border-bright); border-radius: 8px; padding: 7px 10px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--bg2); outline: none; }
+.ex-num { width: 44px; border: 1px solid var(--border-bright); border-radius: 8px; padding: 7px 6px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--bg2); outline: none; text-align: center; }
+.ex-weight { width: 52px; border: 1px solid var(--border-bright); border-radius: 8px; padding: 7px 6px; font-size: 14px; font-family: inherit; color: var(--text); background: var(--bg2); outline: none; text-align: center; }
+.ex-sep { font-size: 16px; color: var(--text-muted); flex-shrink: 0; }
+.ex-name:focus, .ex-num:focus, .ex-weight:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(56,189,248,0.15); }
+.btn-add-exercise { background: none; border: 1px dashed var(--border-bright); color: var(--text-muted); border-radius: 8px; padding: 8px; font-size: 13px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 2px; -webkit-tap-highlight-color: transparent; }
+.btn-add-exercise:hover { border-color: var(--primary); color: var(--primary); }
+
+.vorlage-card { cursor: pointer; transition: border-color 0.15s; }
+.vorlage-card:hover { border-color: var(--primary); }
+.vorlage-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.vorlage-exercises { font-size: 12px; color: var(--text-secondary); }
 
 /* ── Makros ───────────────────────────────────── */
 .macro-card { display: flex; flex-direction: column; gap: 8px; }
