@@ -4,16 +4,11 @@ import {
   onSnapshot, query, orderBy, serverTimestamp
 } from 'firebase/firestore'
 import { db } from '../firebase'
-import { Plus, X, Trash2, Edit2 } from 'lucide-react'
+import { Plus, X, Trash2, Edit2, Settings } from 'lucide-react'
 import { PERSONEN, slug } from '../constants'
+import { useGoals } from '../useGoals'
 
 const MEAL_CHIPS = ['Frühstück', 'Mittagessen', 'Abendessen', 'Snack', 'Shake', 'Post-Workout']
-
-const GOALS = {
-  'Mateo':    { kcal: 2500, protein: 115, carbs: 280, fat: 80 },
-  'Zhuo Jun': { kcal: 2200, protein: 105, carbs: 245, fat: 70 },
-  'Julius':   { kcal: 2400, protein: 110, carbs: 260, fat: 75 },
-}
 
 const MACRO_META = [
   { key: 'kcal',    label: 'Kalorien',      rowLabel: 'Kcal',    unit: 'kcal', color: 'var(--primary)' },
@@ -57,8 +52,8 @@ function fmtTick(v, unit) {
 
 const BAR_H = 110
 
-function MacroChart({ macroKey, label, unit, color, weekDays, dayTotals }) {
-  const maxGoal = Math.max(...PERSONEN.map(p => GOALS[p]?.[macroKey] || 0))
+function MacroChart({ macroKey, label, unit, color, weekDays, dayTotals, goals }) {
+  const maxGoal = Math.max(...PERSONEN.map(p => goals[p]?.[macroKey] || 0))
   const maxActual = Math.max(...weekDays.flatMap(d => PERSONEN.map(p => dayTotals(p, d.str)[macroKey] || 0)))
   const yMax = niceMax(Math.max(maxGoal, maxActual))
   const ySteps = [0, 1, 2, 3, 4].map(i => Math.round((i / 4) * yMax))
@@ -127,7 +122,7 @@ function MacroChart({ macroKey, label, unit, color, weekDays, dayTotals }) {
         {PERSONEN.map(p => (
           <div key={p} className="macro-legend-row">
             <div className={`legend-dot ${slug(p)}`} />
-            <span>{p}: Ziel {GOALS[p]?.[macroKey]}{unit}</span>
+            <span>{p}: Ziel {goals[p]?.[macroKey]}{unit}</span>
           </div>
         ))}
       </div>
@@ -136,12 +131,15 @@ function MacroChart({ macroKey, label, unit, color, weekDays, dayTotals }) {
 }
 
 export default function Makros() {
+  const { goals, updateGoals } = useGoals()
   const [entries, setEntries] = useState([])
   const [view, setView] = useState('heute')
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [editGoalPerson, setEditGoalPerson] = useState(null)
+  const [goalForm, setGoalForm] = useState({ kcal: '', protein: '', carbs: '', fat: '' })
 
   useEffect(() => {
     const q = query(collection(db, 'makros'), orderBy('createdAt', 'asc'))
@@ -184,6 +182,21 @@ export default function Makros() {
   }
 
   async function handleDelete(id) { await deleteDoc(doc(db, 'makros', id)) }
+
+  function openGoalEdit(p) {
+    setEditGoalPerson(p)
+    setGoalForm({
+      kcal:    String(goals[p].kcal),
+      protein: String(goals[p].protein),
+      carbs:   String(goals[p].carbs),
+      fat:     String(goals[p].fat),
+    })
+  }
+
+  async function handleSaveGoal(p) {
+    await updateGoals(p, goalForm)
+    setEditGoalPerson(null)
+  }
 
   function startEdit(entry) {
     setEditingId(entry.id)
@@ -259,16 +272,41 @@ export default function Makros() {
         <>
           {PERSONEN.map(p => {
             const totals = dayTotals(p, today)
-            const goals = GOALS[p]
+            const personGoals = goals[p]
             return (
               <div key={p} className="card macro-card">
                 <div className="protein-progress-header">
                   <span className={`protein-name ${slug(p)}`}>{p}</span>
-                  <span className="protein-goal-label">{totals.kcal} / {goals.kcal} kcal</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span className="protein-goal-label">{totals.kcal} / {personGoals.kcal} kcal</span>
+                    <button className="btn-icon-sm goal-edit-btn"
+                      onClick={() => editGoalPerson === p ? setEditGoalPerson(null) : openGoalEdit(p)}
+                      title="Ziele bearbeiten">
+                      <Settings size={13} />
+                    </button>
+                  </div>
                 </div>
+
+                {editGoalPerson === p && (
+                  <div className="goal-edit-panel">
+                    <div className="row">
+                      <label>Kalorien<input type="number" min="0" value={goalForm.kcal} onChange={e => setGoalForm(f => ({ ...f, kcal: e.target.value }))} /></label>
+                      <label>Protein (g)<input type="number" min="0" value={goalForm.protein} onChange={e => setGoalForm(f => ({ ...f, protein: e.target.value }))} /></label>
+                    </div>
+                    <div className="row">
+                      <label>Kohlenhydrate (g)<input type="number" min="0" value={goalForm.carbs} onChange={e => setGoalForm(f => ({ ...f, carbs: e.target.value }))} /></label>
+                      <label>Fett (g)<input type="number" min="0" value={goalForm.fat} onChange={e => setGoalForm(f => ({ ...f, fat: e.target.value }))} /></label>
+                    </div>
+                    <div className="form-actions" style={{ paddingTop: 0 }}>
+                      <button className="btn-secondary" onClick={() => setEditGoalPerson(null)}>Abbrechen</button>
+                      <button className="btn-primary" onClick={() => handleSaveGoal(p)}>Speichern</button>
+                    </div>
+                  </div>
+                )}
+
                 {MACRO_META.map(m => {
                   const val = totals[m.key]
-                  const goal = goals[m.key]
+                  const goal = personGoals[m.key]
                   const pct = Math.min(100, goal > 0 ? Math.round((val / goal) * 100) : 0)
                   return (
                     <div key={m.key} className="macro-row">
@@ -339,6 +377,7 @@ export default function Makros() {
               color={m.color}
               weekDays={weekDays}
               dayTotals={dayTotals}
+              goals={goals}
             />
           ))}
         </div>

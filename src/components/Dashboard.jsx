@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
 import { PERSONEN, slug } from '../constants'
+import { useGoals } from '../useGoals'
 
 function pad(n) { return String(n).padStart(2, '0') }
 function todayStr() {
@@ -9,13 +10,8 @@ function todayStr() {
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`
 }
 
-const GOALS = {
-  'Mateo':    { kcal: 2500, protein: 115 },
-  'Zhuo Jun': { kcal: 2200, protein: 105 },
-  'Julius':   { kcal: 2400, protein: 110 },
-}
-
 export default function Dashboard() {
+  const { goals } = useGoals()
   const today = todayStr()
   const [todos, setTodos] = useState([])
   const [workouts, setWorkouts] = useState([])
@@ -57,7 +53,7 @@ export default function Dashboard() {
         const todayMakros = makros.filter(m => m.date === today && m.person === person)
         const totalKcal = todayMakros.reduce((s, m) => s + (m.kcal || 0), 0)
         const totalProtein = todayMakros.reduce((s, m) => s + (m.protein || 0), 0)
-        const goals = GOALS[person]
+        const personGoals = goals[person]
         const tb = tagesbuch[`${person}_${today}`]
         const hasDoneWorkout = todayWorkouts.some(w => w.done)
         const allEmpty = openTodos.length === 0 && totalKcal === 0 && todayWorkouts.length === 0 && !tb
@@ -74,11 +70,11 @@ export default function Dashboard() {
                 <div className="dash-macro-label">Kalorien</div>
                 <div className="dash-macro-val">
                   <strong>{totalKcal}</strong>
-                  <span className="dash-macro-unit"> / {goals.kcal}</span>
+                  <span className="dash-macro-unit"> / {personGoals.kcal}</span>
                 </div>
                 <div className="dash-track">
                   <div className="dash-fill" style={{
-                    width: `${Math.min(100, (totalKcal / goals.kcal) * 100)}%`,
+                    width: `${Math.min(100, (totalKcal / personGoals.kcal) * 100)}%`,
                     background: `var(--${slug(person)})`,
                   }} />
                 </div>
@@ -87,11 +83,11 @@ export default function Dashboard() {
                 <div className="dash-macro-label">Protein</div>
                 <div className="dash-macro-val">
                   <strong>{totalProtein}g</strong>
-                  <span className="dash-macro-unit"> / {goals.protein}g</span>
+                  <span className="dash-macro-unit"> / {personGoals.protein}g</span>
                 </div>
                 <div className="dash-track">
                   <div className="dash-fill" style={{
-                    width: `${Math.min(100, (totalProtein / goals.protein) * 100)}%`,
+                    width: `${Math.min(100, (totalProtein / personGoals.protein) * 100)}%`,
                     background: `var(--${slug(person)})`,
                     opacity: 0.65,
                   }} />
