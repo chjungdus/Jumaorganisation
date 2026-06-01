@@ -16,10 +16,10 @@ const GOALS = {
 }
 
 const MACRO_META = [
-  { key: 'kcal',    label: 'Kalorien', unit: 'kcal', color: 'var(--primary)' },
-  { key: 'protein', label: 'Protein',  unit: 'g',    color: 'var(--mateo)' },
-  { key: 'carbs',   label: 'Kohlenhydrate', unit: 'g', color: '#f59e0b' },
-  { key: 'fat',     label: 'Fett',     unit: 'g',    color: '#a78bfa' },
+  { key: 'kcal',    label: 'Kalorien',      rowLabel: 'Kcal',    unit: 'kcal', color: 'var(--primary)' },
+  { key: 'protein', label: 'Protein',        rowLabel: 'Protein', unit: 'g',    color: 'var(--mateo)' },
+  { key: 'carbs',   label: 'Kohlenhydrate',  rowLabel: 'Kohlenh.',unit: 'g',    color: '#f59e0b' },
+  { key: 'fat',     label: 'Fett',           rowLabel: 'Fett',    unit: 'g',    color: '#a78bfa' },
 ]
 
 const EMPTY_FORM = { person: PERSONEN[0], meal: '', kcal: '', protein: '', carbs: '', fat: '' }
@@ -38,9 +38,100 @@ function getWeekDays() {
     d.setDate(today.getDate() - dow + i)
     return {
       str: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`,
-      label: labels[i], isToday: i === dow,
+      label: labels[i],
+      isToday: i === dow,
     }
   })
+}
+
+function niceMax(maxGoal) {
+  const raw = maxGoal * 1.1
+  const step = raw >= 1000 ? 500 : raw >= 200 ? 100 : raw >= 100 ? 50 : 25
+  return Math.ceil(raw / step) * step
+}
+
+function fmtTick(v, unit) {
+  if (unit === 'kcal' && v >= 1000) return `${(v / 1000).toFixed(v % 1000 === 0 ? 0 : 1)}k`
+  return String(v)
+}
+
+const BAR_H = 110
+
+function MacroChart({ macroKey, label, unit, color, weekDays, dayTotals }) {
+  const maxGoal = Math.max(...PERSONEN.map(p => GOALS[p]?.[macroKey] || 0))
+  const yMax = niceMax(maxGoal)
+  const ySteps = [0, 1, 2, 3, 4].map(i => Math.round((i / 4) * yMax))
+
+  return (
+    <div className="card macro-chart-card">
+      <div className="macro-chart-title">
+        {label}
+        <span className="macro-chart-unit"> ({unit})</span>
+      </div>
+
+      <div className="macro-chart-row">
+        {/* Y-axis labels */}
+        <div className="macro-y-col" style={{ height: BAR_H }}>
+          {[...ySteps].reverse().map(v => (
+            <span key={v} className="macro-y-tick"
+              style={{ bottom: `${(v / yMax) * 100}%`, transform: 'translateY(50%)' }}>
+              {fmtTick(v, unit)}
+            </span>
+          ))}
+        </div>
+
+        {/* Plot area: gridlines + bars */}
+        <div className="macro-plot" style={{ height: BAR_H }}>
+          {/* Horizontal gridlines */}
+          {ySteps.map(v => (
+            <div key={v} className="macro-hgrid"
+              style={{ bottom: `${(v / yMax) * 100}%` }} />
+          ))}
+
+          {/* Day columns */}
+          {weekDays.map(day => {
+            const vals = PERSONEN.map(p => dayTotals(p, day.str)[macroKey] || 0)
+            return (
+              <div key={day.str} className="macro-day-col">
+                <div className="macro-bars-group">
+                  {PERSONEN.map((p, pi) => {
+                    const val = vals[pi]
+                    const barH = yMax > 0
+                      ? Math.max(Math.round((val / yMax) * BAR_H), val > 0 ? 2 : 0)
+                      : 0
+                    const showLbl = barH >= 20 && val > 0
+                    return (
+                      <div key={p} className="macro-bar-col">
+                        {showLbl && (
+                          <span className="macro-bar-lbl">{fmtTick(val, unit)}</span>
+                        )}
+                        <div className={`macro-bar ${slug(p)}`}
+                          style={{ height: barH }}
+                          title={`${p}: ${val}${unit}`} />
+                      </div>
+                    )
+                  })}
+                </div>
+                <span className={`saeulen-day-label${day.isToday ? ' protein-today-label' : ''}`}>
+                  {day.label}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Goal legend */}
+      <div className="macro-chart-legend">
+        {PERSONEN.map(p => (
+          <div key={p} className="macro-legend-row">
+            <div className={`legend-dot ${slug(p)}`} />
+            <span>{p}: Ziel {GOALS[p]?.[macroKey]}{unit}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default function Makros() {
@@ -65,10 +156,10 @@ export default function Makros() {
   function dayTotals(person, dateStr) {
     return entries.filter(e => e.person === person && e.date === dateStr)
       .reduce((s, e) => ({
-        kcal: s.kcal + (e.kcal || 0),
+        kcal:    s.kcal    + (e.kcal    || 0),
         protein: s.protein + (e.protein || 0),
-        carbs: s.carbs + (e.carbs || 0),
-        fat: s.fat + (e.fat || 0),
+        carbs:   s.carbs   + (e.carbs   || 0),
+        fat:     s.fat     + (e.fat     || 0),
       }), { kcal: 0, protein: 0, carbs: 0, fat: 0 })
   }
 
@@ -76,10 +167,10 @@ export default function Makros() {
     e.preventDefault()
     const data = {
       person: form.person, meal: form.meal.trim(),
-      kcal: parseInt(form.kcal) || 0,
+      kcal:    parseInt(form.kcal)    || 0,
       protein: parseInt(form.protein) || 0,
-      carbs: parseInt(form.carbs) || 0,
-      fat: parseInt(form.fat) || 0,
+      carbs:   parseInt(form.carbs)   || 0,
+      fat:     parseInt(form.fat)     || 0,
     }
     if (!data.kcal && !data.protein && !data.carbs && !data.fat) return
     if (editingId) {
@@ -97,8 +188,10 @@ export default function Makros() {
     setEditingId(entry.id)
     setForm({
       person: entry.person, meal: entry.meal || '',
-      kcal: String(entry.kcal || ''), protein: String(entry.protein || ''),
-      carbs: String(entry.carbs || ''), fat: String(entry.fat || ''),
+      kcal:    String(entry.kcal    || ''),
+      protein: String(entry.protein || ''),
+      carbs:   String(entry.carbs   || ''),
+      fat:     String(entry.fat     || ''),
     })
     setShowForm(true)
   }
@@ -178,11 +271,14 @@ export default function Makros() {
                   const pct = Math.min(100, goal > 0 ? Math.round((val / goal) * 100) : 0)
                   return (
                     <div key={m.key} className="macro-row">
-                      <span className="macro-label">{m.label}</span>
+                      <span className="macro-label">{m.rowLabel}</span>
                       <div className="macro-track">
                         <div className="macro-fill" style={{ width: `${pct}%`, background: m.color }} />
                       </div>
-                      <span className="macro-value">{val}<span className="macro-unit">{m.unit}</span></span>
+                      <div className="macro-val-col">
+                        <span className="macro-val-cur">{val}</span>
+                        <span className="macro-val-goal">/{goal}{m.unit}</span>
+                      </div>
                     </div>
                   )
                 })}
@@ -192,7 +288,11 @@ export default function Makros() {
 
           <div className="protein-entries-list">
             {todayEntries.length === 0 && (
-              <div className="empty-state small">Noch keine Einträge heute — auf + drücken</div>
+              <div className="empty-state small">
+                Noch keine Einträge heute.
+                <br />
+                <button className="btn-primary" onClick={() => setShowForm(true)} style={{ marginTop: 10, fontSize: 13, padding: '8px 16px' }}>Mahlzeit eintragen</button>
+              </div>
             )}
             {[...todayEntries].reverse().map(entry => (
               <div key={entry.id} className={`card protein-entry person-border-${slug(entry.person)}`}>
@@ -201,10 +301,10 @@ export default function Makros() {
                   <div style={{ flex: 1 }}>
                     {entry.meal && <div className="protein-entry-meal">{entry.meal}</div>}
                     <div className="macro-entry-stats">
-                      {entry.kcal > 0 && <span>{entry.kcal} kcal</span>}
+                      {entry.kcal    > 0 && <span>{entry.kcal} kcal</span>}
                       {entry.protein > 0 && <span>{entry.protein}g P</span>}
-                      {entry.carbs > 0 && <span>{entry.carbs}g K</span>}
-                      {entry.fat > 0 && <span>{entry.fat}g F</span>}
+                      {entry.carbs   > 0 && <span>{entry.carbs}g K</span>}
+                      {entry.fat     > 0 && <span>{entry.fat}g F</span>}
                     </div>
                   </div>
                 </div>
@@ -229,51 +329,17 @@ export default function Makros() {
       )}
 
       {view === 'woche' && (
-        <div className="card saeulen-card">
-          <div className="saeulen-header">
-            <span className="stat-section-title">Kalorien diese Woche</span>
-          </div>
-          <div className="saeulen-chart">
-            {weekDays.map(day => {
-              const vals = PERSONEN.map(p => dayTotals(p, day.str).kcal)
-              const maxKcal = Math.max(...GOALS['Mateo'].kcal > 0 ? [GOALS['Mateo'].kcal] : [], ...vals, 1)
-              return (
-                <div key={day.str} className="saeulen-day">
-                  <div className="saeulen-bars">
-                    {PERSONEN.map((p, pi) => {
-                      const val = vals[pi]
-                      const barH = Math.round((val / maxKcal) * 120)
-                      return (
-                        <div key={p} className={`saeulen-bar ${slug(p)}`}
-                          style={{ height: `${Math.max(barH, val > 0 ? 3 : 0)}px` }}
-                          title={`${p}: ${val} kcal`} />
-                      )
-                    })}
-                  </div>
-                  <span className={`saeulen-day-label${day.isToday ? ' protein-today-label' : ''}`}>{day.label}</span>
-                </div>
-              )
-            })}
-          </div>
-          <div className="chart-legend">
-            {PERSONEN.map(p => (
-              <div key={p} className="legend-item"><div className={`legend-dot ${slug(p)}`} />{p}</div>
-            ))}
-          </div>
-          <div className="protein-week-totals">
-            {PERSONEN.map(p => {
-              const weekKcal = weekDays.reduce((s, d) => s + dayTotals(p, d.str).kcal, 0)
-              const weekProtein = weekDays.reduce((s, d) => s + dayTotals(p, d.str).protein, 0)
-              return (
-                <div key={p} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <span className={`comp-name ${slug(p)}`} style={{ fontSize: 13, marginBottom: 2 }}>{p}</span>
-                  <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-                    {weekKcal} kcal · {weekProtein}g Protein diese Woche
-                  </span>
-                </div>
-              )
-            })}
-          </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 8 }}>
+          {MACRO_META.map(m => (
+            <MacroChart key={m.key}
+              macroKey={m.key}
+              label={m.label}
+              unit={m.unit}
+              color={m.color}
+              weekDays={weekDays}
+              dayTotals={dayTotals}
+            />
+          ))}
         </div>
       )}
     </div>

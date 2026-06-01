@@ -1331,3 +1331,28 @@ body {
 }
 .mehr-item.active { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
 .mehr-item:active { transform: scale(0.95); }
+
+/* ── Macro Charts (Woche) ─────────────────────── */
+.macro-chart-card { padding: 14px; }
+.macro-chart-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.macro-chart-unit { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+.macro-chart-row { display: flex; gap: 4px; align-items: flex-end; margin-bottom: 10px; }
+.macro-y-col { position: relative; flex-shrink: 0; width: 30px; }
+.macro-y-tick { position: absolute; right: 4px; font-size: 9px; color: var(--text-muted); font-weight: 600; line-height: 1; white-space: nowrap; }
+.macro-plot { position: relative; flex: 1; display: flex; align-items: flex-end; gap: 2px; }
+.macro-hgrid { position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.07); pointer-events: none; z-index: 0; }
+.macro-day-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; z-index: 1; }
+.macro-bars-group { display: flex; align-items: flex-end; gap: 2px; justify-content: center; }
+.macro-bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.macro-bar-lbl { font-size: 7px; color: var(--text-muted); font-weight: 700; line-height: 1; margin-bottom: 2px; white-space: nowrap; }
+.macro-bar { width: 10px; border-radius: 3px 3px 0 0; transition: height 0.4s cubic-bezier(0.4,0,0.2,1); }
+.macro-bar.mateo { background: var(--mateo); }
+.macro-bar.zhuojun { background: var(--zhuojun); }
+.macro-bar.julius { background: var(--julius); }
+.macro-chart-legend { display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.macro-legend-row { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+/* ── Macro Heute goal display ─────────────────── */
+.macro-val-col { display: flex; flex-direction: column; align-items: flex-end; min-width: 58px; flex-shrink: 0; }
+.macro-val-cur { font-size: 13px; font-weight: 800; color: var(--text); }
+.macro-val-goal { font-size: 10px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
