@@ -81,6 +81,12 @@ function hoursForPerson(entries, person, start, end) {
     .reduce((sum, e) => sum + calcHours(e.startTime, e.endTime), 0)
 }
 
+function niceMaxH(maxH) {
+  const raw = (maxH || 0.01) * 1.1
+  const step = raw >= 8 ? 2 : raw >= 4 ? 1 : 0.5
+  return Math.ceil(raw / step) * step
+}
+
 const TODAY = new Date().toISOString().split('T')[0]
 
 function CompCard({ label, h1, h2 }) {
@@ -110,23 +116,28 @@ function CompCard({ label, h1, h2 }) {
 
 function Saeulendiagramm({ entries }) {
   const [mode, setMode] = useState('woche')
-  const p1 = PERSONEN[0], p2 = PERSONEN[1]
   const CHART_H = 120
 
   const wocheData = getCurrentWeekDays().map(({ date, label }) => ({
     label,
-    h1: entries.filter(e => e.person === p1 && e.date === date).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
-    h2: entries.filter(e => e.person === p2 && e.date === date).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
+    vals: PERSONEN.map(p =>
+      entries.filter(e => e.person === p && e.date === date)
+        .reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0)
+    ),
   }))
 
   const monatData = getCurrentMonthWeeks().map(({ start, end, label }) => ({
     label,
-    h1: entries.filter(e => e.person === p1 && e.date >= start && e.date <= end).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
-    h2: entries.filter(e => e.person === p2 && e.date >= start && e.date <= end).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0),
+    vals: PERSONEN.map(p =>
+      entries.filter(e => e.person === p && e.date >= start && e.date <= end)
+        .reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0)
+    ),
   }))
 
   const data = mode === 'woche' ? wocheData : monatData
-  const maxH = Math.max(...data.flatMap(d => [d.h1, d.h2]), 0.5)
+  const maxH = Math.max(...data.flatMap(d => d.vals), 0.01)
+  const yMax = niceMaxH(maxH)
+  const ySteps = [0, 1, 2, 3, 4].map(i => (i / 4) * yMax)
 
   return (
     <div className="saeulen-card card">
@@ -137,20 +148,45 @@ function Saeulendiagramm({ entries }) {
           <button className={`chart-mode-btn ${mode === 'monat' ? 'active' : ''}`} onClick={() => setMode('monat')}>Monat</button>
         </div>
       </div>
-      <div className="saeulen-chart">
-        {data.map((d, i) => (
-          <div key={i} className="saeulen-day">
-            <div className="saeulen-bars">
-              <div className={`saeulen-bar ${slug(p1)}`} style={{ height: `${Math.max((d.h1 / maxH) * CHART_H, d.h1 > 0 ? 4 : 0)}px` }} title={`${p1}: ${fmtHours(d.h1)}`} />
-              <div className={`saeulen-bar ${slug(p2)}`} style={{ height: `${Math.max((d.h2 / maxH) * CHART_H, d.h2 > 0 ? 4 : 0)}px` }} title={`${p2}: ${fmtHours(d.h2)}`} />
+      <div className="macro-chart-row">
+        <div className="macro-y-col" style={{ height: CHART_H }}>
+          {[...ySteps].reverse().map(v => (
+            <span key={v} className="macro-y-tick"
+              style={{ bottom: `${(v / yMax) * 100}%`, transform: 'translateY(50%)' }}>
+              {v === 0 ? '0' : `${Number.isInteger(v) ? v : v.toFixed(1)}h`}
+            </span>
+          ))}
+        </div>
+        <div className="macro-plot" style={{ height: CHART_H }}>
+          {ySteps.map(v => (
+            <div key={v} className="macro-hgrid" style={{ bottom: `${(v / yMax) * 100}%` }} />
+          ))}
+          {data.map((d, i) => (
+            <div key={i} className="macro-day-col">
+              <div className="macro-bars-group">
+                {PERSONEN.map((p, pi) => {
+                  const val = d.vals[pi]
+                  const barH = yMax > 0 ? Math.max(Math.round((val / yMax) * CHART_H), val > 0 ? 2 : 0) : 0
+                  return (
+                    <div key={p} className="macro-bar-col">
+                      <div className={`macro-bar ${slug(p)}`}
+                        style={{ height: barH }}
+                        title={`${p}: ${fmtHours(val)}`} />
+                    </div>
+                  )
+                })}
+              </div>
+              <span className="saeulen-day-label">{d.label}</span>
             </div>
-            <div className="saeulen-day-label">{d.label}</div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <div className="chart-legend">
-        <span className="legend-item"><span className={`legend-dot ${slug(p1)}`} />{p1}</span>
-        <span className="legend-item"><span className={`legend-dot ${slug(p2)}`} />{p2}</span>
+        {PERSONEN.map(p => (
+          <span key={p} className="legend-item">
+            <span className={`legend-dot ${slug(p)}`} />{p}
+          </span>
+        ))}
       </div>
     </div>
   )

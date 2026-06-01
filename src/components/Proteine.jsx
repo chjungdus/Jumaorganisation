@@ -14,6 +14,12 @@ function todayStr() {
   const d = new Date()
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
+function niceMax(maxVal) {
+  const raw = (maxVal || 1) * 1.1
+  const step = raw >= 1000 ? 500 : raw >= 200 ? 100 : raw >= 100 ? 50 : 25
+  return Math.ceil(raw / step) * step
+}
+
 function getWeekDays() {
   const today = new Date()
   const dow = (today.getDay() + 6) % 7
@@ -93,6 +99,9 @@ export default function Proteine() {
     ...PERSONEN.flatMap(p => weekDays.map(d => dayTotal(p, d.str))),
     ...Object.values(PROTEIN_GOALS)
   )
+  const CHART_H = 120
+  const yMax = niceMax(weekMax)
+  const ySteps = [0, 1, 2, 3, 4].map(i => Math.round((i / 4) * yMax))
 
   return (
     <div className="page">
@@ -211,23 +220,40 @@ export default function Proteine() {
           <div className="saeulen-header">
             <span className="stat-section-title">Diese Woche</span>
           </div>
-          <div className="saeulen-chart">
-            {weekDays.map(day => (
-              <div key={day.str} className="saeulen-day">
-                <div className="saeulen-bars">
-                  {PERSONEN.map(p => {
-                    const total = dayTotal(p, day.str)
-                    const barH = weekMax > 0 ? Math.round((total / weekMax) * 120) : 0
-                    return (
-                      <div key={p} className={`saeulen-bar ${slug(p)}`}
-                        style={{ height: `${Math.max(barH, total > 0 ? 3 : 0)}px` }}
-                        title={`${p}: ${total}g`} />
-                    )
-                  })}
+          <div className="macro-chart-row">
+            <div className="macro-y-col" style={{ height: CHART_H }}>
+              {[...ySteps].reverse().map(v => (
+                <span key={v} className="macro-y-tick"
+                  style={{ bottom: `${(v / yMax) * 100}%`, transform: 'translateY(50%)' }}>
+                  {v}
+                </span>
+              ))}
+            </div>
+            <div className="macro-plot" style={{ height: CHART_H }}>
+              {ySteps.map(v => (
+                <div key={v} className="macro-hgrid" style={{ bottom: `${(v / yMax) * 100}%` }} />
+              ))}
+              {weekDays.map(day => (
+                <div key={day.str} className="macro-day-col">
+                  <div className="macro-bars-group">
+                    {PERSONEN.map(p => {
+                      const val = dayTotal(p, day.str)
+                      const barH = yMax > 0 ? Math.max(Math.round((val / yMax) * CHART_H), val > 0 ? 2 : 0) : 0
+                      return (
+                        <div key={p} className="macro-bar-col">
+                          <div className={`macro-bar ${slug(p)}`}
+                            style={{ height: barH }}
+                            title={`${p}: ${val}g`} />
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <span className={`saeulen-day-label${day.isToday ? ' protein-today-label' : ''}`}>
+                    {day.label}
+                  </span>
                 </div>
-                <span className={`saeulen-day-label${day.isToday ? ' protein-today-label' : ''}`}>{day.label}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
           <div className="chart-legend">
             {PERSONEN.map(p => (
@@ -237,7 +263,6 @@ export default function Proteine() {
               </div>
             ))}
           </div>
-
           <div className="protein-week-totals">
             {PERSONEN.map(p => {
               const weekTotal = weekDays.reduce((s, d) => s + dayTotal(p, d.str), 0)
