@@ -59,7 +59,8 @@ const BAR_H = 110
 
 function MacroChart({ macroKey, label, unit, color, weekDays, dayTotals }) {
   const maxGoal = Math.max(...PERSONEN.map(p => GOALS[p]?.[macroKey] || 0))
-  const yMax = niceMax(maxGoal)
+  const maxActual = Math.max(...weekDays.flatMap(d => PERSONEN.map(p => dayTotals(p, d.str)[macroKey] || 0)))
+  const yMax = niceMax(Math.max(maxGoal, maxActual))
   const ySteps = [0, 1, 2, 3, 4].map(i => Math.round((i / 4) * yMax))
 
   return (
