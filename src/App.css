@@ -1368,3 +1368,108 @@ body {
   border-radius: var(--radius-sm); padding: 12px 12px 8px;
   margin: 6px 0 10px; display: flex; flex-direction: column; gap: 8px;
 }
+
+/* ── SchnellEintrag Modal ─────────────────────── */
+.schnell-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+  z-index: 200; display: flex; align-items: flex-end; justify-content: center;
+}
+.schnell-sheet {
+  background: var(--card); border-radius: var(--radius) var(--radius) 0 0;
+  padding: 12px 20px 36px; width: 100%; max-width: 480px;
+  max-height: 92vh; overflow-y: auto;
+  border: 1px solid var(--border-bright); border-bottom: none;
+}
+.schnell-handle {
+  width: 36px; height: 4px; background: var(--border-bright);
+  border-radius: 2px; margin: 0 auto 16px;
+}
+.schnell-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+}
+.schnell-search-wrap {
+  position: relative; margin-bottom: 8px;
+}
+.schnell-search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-muted); pointer-events: none;
+}
+.schnell-search {
+  width: 100%; padding: 11px 36px 11px 36px;
+  background: var(--bg2); border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-size: 15px; font-family: inherit; outline: none;
+}
+.schnell-search:focus { border-color: var(--primary); }
+.schnell-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;
+}
+.schnell-dropdown {
+  background: var(--card2); border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden;
+}
+.schnell-dropdown-item {
+  display: flex; justify-content: space-between; align-items: center;
+  width: 100%; padding: 11px 14px; background: none;
+  border: none; border-bottom: 1px solid var(--border);
+  color: var(--text); font-size: 14px; font-family: inherit;
+  cursor: pointer; text-align: left;
+}
+.schnell-dropdown-item:last-child { border-bottom: none; }
+.schnell-dropdown-item:active { background: var(--bg2); }
+.schnell-food-name { font-weight: 600; }
+.schnell-food-meta { font-size: 11px; color: var(--text-muted); font-weight: 600; flex-shrink: 0; margin-left: 8px; }
+.schnell-section-label {
+  font-size: 10px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px;
+}
+.schnell-quickpicks { display: flex; flex-wrap: wrap; gap: 6px; }
+.schnell-quickpick {
+  padding: 6px 12px; background: var(--bg2); border: 1px solid var(--border-bright);
+  border-radius: 20px; color: var(--text); font-size: 12px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: all 0.15s;
+}
+.schnell-quickpick:active { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+.schnell-food-card {
+  background: var(--bg2); border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px;
+}
+.schnell-food-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+.schnell-menge-row {
+  display: flex; align-items: center; gap: 12px;
+  justify-content: center; margin-bottom: 14px;
+}
+.schnell-menge-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--card); border: 1px solid var(--border-bright);
+  color: var(--text); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.schnell-menge-btn:active { background: var(--primary-light); border-color: var(--primary); }
+.schnell-menge-input-wrap { display: flex; align-items: baseline; gap: 4px; }
+.schnell-menge-input {
+  width: 72px; text-align: center; font-size: 26px; font-weight: 800;
+  color: var(--text); background: none; border: none; outline: none;
+  font-family: inherit; -moz-appearance: textfield;
+}
+.schnell-menge-input::-webkit-outer-spin-button,
+.schnell-menge-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.schnell-menge-unit { font-size: 15px; color: var(--text-muted); font-weight: 600; }
+.schnell-macro-preview {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 6px; padding-top: 12px; border-top: 1px solid var(--border);
+}
+.schnell-macro-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.schnell-macro-val { font-size: 17px; font-weight: 800; }
+.schnell-macro-lbl { font-size: 9px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.schnell-vorlage-toggle {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  padding: 10px 14px; background: var(--bg2);
+  border: 1px solid var(--border-bright); border-radius: var(--radius-sm);
+  color: var(--text-muted); font-size: 13px; font-weight: 600;
+  font-family: inherit; cursor: pointer; transition: all 0.15s; margin-bottom: 4px;
+}
+.schnell-vorlage-toggle.active {
+  background: rgba(255,200,0,0.08); border-color: rgba(255,200,0,0.3); color: var(--mittel);
+}

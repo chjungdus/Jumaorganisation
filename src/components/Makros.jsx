@@ -7,6 +7,7 @@ import { db } from '../firebase'
 import { Plus, X, Trash2, Edit2, Settings } from 'lucide-react'
 import { PERSONEN, slug } from '../constants'
 import { useGoals } from '../useGoals'
+import SchnellEintrag from './SchnellEintrag'
 
 const MEAL_CHIPS = ['Frühstück', 'Mittagessen', 'Abendessen', 'Snack', 'Shake', 'Post-Workout']
 
@@ -140,6 +141,7 @@ export default function Makros() {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
   const [editGoalPerson, setEditGoalPerson] = useState(null)
   const [goalForm, setGoalForm] = useState({ kcal: '', protein: '', carbs: '', fat: '' })
+  const [showSchnellEintrag, setShowSchnellEintrag] = useState(false)
 
   useEffect(() => {
     const q = query(collection(db, 'makros'), orderBy('createdAt', 'asc'))
@@ -216,17 +218,24 @@ export default function Makros() {
     <div className="page">
       <div className="page-header">
         <h1>Makros</h1>
-        <button className="btn-icon" onClick={() => { setShowForm(v => !v); setEditingId(null); setForm(EMPTY_FORM) }}>
-          {showForm ? <X size={22} /> : <Plus size={22} />}
+        <button className="btn-icon" onClick={() => setShowSchnellEintrag(true)}>
+          <Plus size={22} />
         </button>
       </div>
+
+      {showSchnellEintrag && (
+        <SchnellEintrag
+          defaultPerson={PERSONEN[0]}
+          onClose={() => setShowSchnellEintrag(false)}
+        />
+      )}
 
       <div className="view-toggle">
         <button className={`view-toggle-btn ${view === 'heute' ? 'active' : ''}`} onClick={() => setView('heute')}>Heute</button>
         <button className={`view-toggle-btn ${view === 'woche' ? 'active' : ''}`} onClick={() => setView('woche')}>Woche</button>
       </div>
 
-      {showForm && (
+      {showForm && editingId && (
         <div className="card form-card">
           <div className="form-header">
             <h3>{editingId ? 'Eintrag bearbeiten' : 'Mahlzeit eintragen'}</h3>
