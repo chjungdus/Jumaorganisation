@@ -1483,3 +1483,15 @@ body {
 .schnell-vorlage-toggle.active {
   background: rgba(255,200,0,0.08); border-color: rgba(255,200,0,0.3); color: var(--mittel);
 }
+.schnell-tabs {
+  display: flex; gap: 6px; margin-bottom: 14px;
+}
+.schnell-tab {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 12px; background: var(--bg2); border: 1px solid var(--border-bright);
+  border-radius: var(--radius-sm); color: var(--text-muted);
+  font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.15s;
+}
+.schnell-tab.active {
+  background: var(--primary-light); border-color: var(--primary); color: var(--primary);
+}

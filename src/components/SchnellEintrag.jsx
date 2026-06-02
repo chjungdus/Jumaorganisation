@@ -40,10 +40,12 @@ const LEBENSMITTEL = [
 
 export default function SchnellEintrag({ defaultPerson, onClose }) {
   const [person, setPerson] = useState(defaultPerson || PERSONEN[0])
+  const [mode, setMode] = useState('suche') // 'suche' | 'manuell'
   const [query, setQuery] = useState('')
   const [selectedFood, setSelectedFood] = useState(null)
   const [menge, setMenge] = useState(100)
   const [mahlzeit, setMahlzeit] = useState('')
+  const [manForm, setManForm] = useState({ kcal: '', protein: '', carbs: '', fat: '' })
   const [alsVorlage, setAlsVorlage] = useState(false)
   const [vorlageName, setVorlageName] = useState('')
   const [vorlagen, setVorlagen] = useState([])
@@ -82,14 +84,21 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
     inputRef.current?.focus()
   }
 
-  const macros = selectedFood ? {
-    kcal:    Math.round(selectedFood.kcalPer100    * menge / 100),
-    protein: Math.round(selectedFood.proteinPer100 * menge / 100),
-    carbs:   Math.round(selectedFood.carbsPer100   * menge / 100),
-    fat:     Math.round(selectedFood.fatPer100     * menge / 100),
-  } : null
+  const macros = mode === 'manuell'
+    ? {
+        kcal:    parseInt(manForm.kcal)    || 0,
+        protein: parseInt(manForm.protein) || 0,
+        carbs:   parseInt(manForm.carbs)   || 0,
+        fat:     parseInt(manForm.fat)     || 0,
+      }
+    : selectedFood ? {
+        kcal:    Math.round(selectedFood.kcalPer100    * menge / 100),
+        protein: Math.round(selectedFood.proteinPer100 * menge / 100),
+        carbs:   Math.round(selectedFood.carbsPer100   * menge / 100),
+        fat:     Math.round(selectedFood.fatPer100     * menge / 100),
+      } : null
 
-  const canSave = macros && (macros.kcal > 0 || macros.protein > 0)
+  const canSave = macros && (macros.kcal > 0 || macros.protein > 0 || macros.carbs > 0 || macros.fat > 0)
 
   async function handleSave() {
     if (!canSave) return
@@ -142,8 +151,74 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
           ))}
         </div>
 
-        {/* Suchfeld */}
-        <div className="schnell-search-wrap">
+        {/* Mode Tabs */}
+        <div className="schnell-tabs">
+          <button className={`schnell-tab ${mode === 'suche' ? 'active' : ''}`} onClick={() => setMode('suche')}>
+            <Search size={13} /> Suchen
+          </button>
+          <button className={`schnell-tab ${mode === 'manuell' ? 'active' : ''}`} onClick={() => setMode('manuell')}>
+            ✏️ Manuell
+          </button>
+        </div>
+
+        {/* Manuelle Eingabe */}
+        {mode === 'manuell' && (
+          <>
+            <label style={{ marginBottom: 10 }}>
+              Mahlzeit / Beschreibung
+              <input
+                autoFocus
+                value={mahlzeit}
+                onChange={e => setMahlzeit(e.target.value)}
+                placeholder="z.B. Hähnchen mit Reis"
+              />
+            </label>
+            <div className="row">
+              <label>Kalorien (kcal)
+                <input type="number" min="0" value={manForm.kcal}
+                  onChange={e => setManForm(f => ({ ...f, kcal: e.target.value }))}
+                  placeholder="z.B. 500" />
+              </label>
+              <label>Protein (g)
+                <input type="number" min="0" value={manForm.protein}
+                  onChange={e => setManForm(f => ({ ...f, protein: e.target.value }))}
+                  placeholder="z.B. 40" />
+              </label>
+            </div>
+            <div className="row">
+              <label>Kohlenhydrate (g)
+                <input type="number" min="0" value={manForm.carbs}
+                  onChange={e => setManForm(f => ({ ...f, carbs: e.target.value }))}
+                  placeholder="z.B. 60" />
+              </label>
+              <label>Fett (g)
+                <input type="number" min="0" value={manForm.fat}
+                  onChange={e => setManForm(f => ({ ...f, fat: e.target.value }))}
+                  placeholder="z.B. 15" />
+              </label>
+            </div>
+            {canSave && (
+              <div className="schnell-food-card" style={{ marginTop: 4 }}>
+                <div className="schnell-macro-preview">
+                  {[
+                    { val: macros.kcal,         lbl: 'kcal',      color: 'var(--primary)' },
+                    { val: `${macros.protein}g`, lbl: 'Protein',   color: 'var(--mateo)'   },
+                    { val: `${macros.carbs}g`,   lbl: 'Kohlenhydr.', color: '#f59e0b'      },
+                    { val: `${macros.fat}g`,     lbl: 'Fett',      color: '#a78bfa'        },
+                  ].map(({ val, lbl, color }) => (
+                    <div key={lbl} className="schnell-macro-item">
+                      <span className="schnell-macro-val" style={{ color }}>{val}</span>
+                      <span className="schnell-macro-lbl">{lbl}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Suchfeld (nur im Such-Modus) */}
+        {mode === 'suche' && <div className="schnell-search-wrap">
           <Search size={15} className="schnell-search-icon" />
           <input
             ref={inputRef}
@@ -162,9 +237,10 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
           {query && (
             <button className="schnell-clear" onClick={clearFood}><X size={14} /></button>
           )}
-        </div>
+        </div>}
 
-        {/* Dropdown */}
+        {/* Dropdown + Schnellauswahl (nur im Such-Modus) */}
+        {mode === 'suche' && (<>
         {showDropdown && filteredFoods.length > 0 && (
           <div className="schnell-dropdown">
             {filteredFoods.map((food, i) => (
@@ -261,6 +337,7 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
             )}
           </>
         )}
+        </>)}{/* end mode === 'suche' */}
 
         </div>{/* end schnell-scrollable */}
         <div className="schnell-actions">
