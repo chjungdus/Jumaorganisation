@@ -123,7 +123,7 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
   }
 
   return (
-    <div className="schnell-overlay" onMouseDown={e => e.target === e.currentTarget && onClose()}>
+    <div className="schnell-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="schnell-sheet">
         <div className="schnell-handle" />
 
@@ -132,6 +132,7 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
           <button className="btn-icon-sm" onClick={onClose}><X size={18} /></button>
         </div>
 
+        <div className="schnell-scrollable">
         {/* Person */}
         <div className="person-select" style={{ marginBottom: 14 }}>
           {PERSONEN.map(p => (
@@ -156,6 +157,7 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
               if (!e.target.value) setSelectedFood(null)
             }}
             onFocus={() => setShowDropdown(true)}
+            onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
           />
           {query && (
             <button className="schnell-clear" onClick={clearFood}><X size={14} /></button>
@@ -166,7 +168,7 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
         {showDropdown && filteredFoods.length > 0 && (
           <div className="schnell-dropdown">
             {filteredFoods.map((food, i) => (
-              <button key={i} className="schnell-dropdown-item" onMouseDown={() => selectFood(food)}>
+              <button key={i} className="schnell-dropdown-item" onClick={() => selectFood(food)}>
                 <span className="schnell-food-name">
                   {food.isVorlage && <Star size={10} style={{ marginRight: 4, color: 'var(--mittel)', verticalAlign: 'middle' }} />}
                   {food.name}
@@ -260,7 +262,8 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
           </>
         )}
 
-        <div className="form-actions" style={{ marginTop: 18 }}>
+        </div>{/* end schnell-scrollable */}
+        <div className="schnell-actions">
           <button className="btn-secondary" onClick={onClose}>Abbrechen</button>
           <button className="btn-primary" onClick={handleSave} disabled={!canSave || saving}>
             {saving ? 'Wird gespeichert…' : 'Eintragen'}
