@@ -1385,7 +1385,7 @@ body {
   flex: 1; overflow-y: auto; padding-bottom: 8px;
 }
 .schnell-actions {
-  display: flex; gap: 10px; padding: 12px 0 32px;
+  display: flex; gap: 10px; padding: 12px 0 calc(var(--nav-height) + 16px);
   border-top: 1px solid var(--border); margin-top: 8px; flex-shrink: 0;
 }
 .schnell-actions .btn-secondary,
