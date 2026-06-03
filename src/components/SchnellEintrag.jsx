@@ -103,9 +103,10 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
   async function handleSave() {
     if (!canSave) return
     setSaving(true)
+    try {
     await addDoc(collection(db, 'makros'), {
       person,
-      meal: mahlzeit.trim() || selectedFood.name,
+      meal: mahlzeit.trim() || selectedFood?.name || '',
       kcal:    macros.kcal,
       protein: macros.protein,
       carbs:   macros.carbs,
@@ -126,6 +127,9 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
           createdAt:     serverTimestamp(),
         })
       }
+    }
+    } catch (err) {
+      console.error('Fehler beim Speichern:', err)
     }
     setSaving(false)
     onClose()
