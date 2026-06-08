@@ -493,6 +493,15 @@ body {
 }
 
 .week-summary strong { font-weight: 800; font-size: 17px; }
+.week-goal-label { font-size: 12px; font-weight: 500; opacity: 0.75; margin-left: 4px; }
+.week-goal-bar { height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin-top: 7px; overflow: hidden; }
+.week-goal-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; opacity: 0.85; }
+
+.week-summary.julius-accent {
+  background: var(--julius-light);
+  color: var(--julius);
+  border-color: rgba(52,211,153,0.25);
+}
 
 /* ── Work entries ─────────────────────────────── */
 .entries-list { display: flex; flex-direction: column; gap: 16px; padding-bottom: 8px; }
@@ -1297,6 +1306,7 @@ body {
 .dash-macro-unit { font-size: 11px; color: var(--text-muted); font-weight: 500; }
 .dash-track { height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
 .dash-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; min-width: 2px; }
+.dash-work-section { margin-bottom: 10px; }
 .dash-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
 .dash-pill { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; border: 1px solid transparent; }
 .pill-green { background: rgba(57,255,20,0.09); color: #4ade80; border-color: rgba(57,255,20,0.2); }
@@ -1349,6 +1359,10 @@ body {
 .macro-y-tick { position: absolute; right: 4px; font-size: 9px; color: var(--text-muted); font-weight: 600; line-height: 1; white-space: nowrap; }
 .macro-plot { position: relative; flex: 1; display: flex; align-items: flex-end; gap: 2px; }
 .macro-hgrid { position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.07); pointer-events: none; z-index: 0; }
+.work-goal-line { position: absolute; left: 0; right: 0; height: 0; border-top: 2px dashed; opacity: 0.75; pointer-events: none; z-index: 2; }
+.work-goal-line.mateo { border-color: var(--mateo); }
+.work-goal-line.zhuojun { border-color: var(--zhuojun); }
+.legend-goal-text { font-size: 10px; color: var(--text-muted); font-weight: 500; }
 .macro-day-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; z-index: 1; }
 .macro-bars-group { display: flex; align-items: flex-end; gap: 2px; justify-content: center; }
 .macro-bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }

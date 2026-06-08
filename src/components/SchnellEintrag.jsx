@@ -52,6 +52,7 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
   const [showDropdown, setShowDropdown] = useState(false)
   const [saving, setSaving] = useState(false)
   const inputRef = useRef(null)
+  const dropdownTimerRef = useRef(null)
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'vorlagen'), snap =>
@@ -231,12 +232,18 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
             autoFocus
             placeholder="Lebensmittel suchen…"
             onChange={e => {
+              if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current)
               setQuery(e.target.value)
               setShowDropdown(true)
               if (!e.target.value) setSelectedFood(null)
             }}
-            onFocus={() => setShowDropdown(true)}
-            onBlur={() => setTimeout(() => setShowDropdown(false), 150)}
+            onFocus={() => {
+              if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current)
+              setShowDropdown(true)
+            }}
+            onBlur={() => {
+              dropdownTimerRef.current = setTimeout(() => setShowDropdown(false), 250)
+            }}
           />
           {query && (
             <button className="schnell-clear" onClick={clearFood}><X size={14} /></button>

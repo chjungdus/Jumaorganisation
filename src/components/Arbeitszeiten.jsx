@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Plus, Trash2, Clock, X, Edit2 } from 'lucide-react'
-import { PERSONEN, slug } from '../constants'
+import { PERSONEN, slug, WORK_GOALS } from '../constants'
 
 function calcHours(start, end) {
   if (!start || !end) return 0
@@ -135,7 +135,10 @@ function Saeulendiagramm({ entries }) {
   }))
 
   const data = mode === 'woche' ? wocheData : monatData
-  const maxH = Math.max(...data.flatMap(d => d.vals), 0.01)
+  const goalVals = PERSONEN.filter(p => WORK_GOALS[p]).map(p =>
+    mode === 'woche' ? WORK_GOALS[p].weekly / 7 : WORK_GOALS[p].weekly
+  )
+  const maxH = Math.max(...data.flatMap(d => d.vals), ...goalVals, 0.01)
   const yMax = niceMaxH(maxH)
   const ySteps = [0, 1, 2, 3, 4].map(i => (i / 4) * yMax)
 
@@ -161,6 +164,13 @@ function Saeulendiagramm({ entries }) {
           {ySteps.map(v => (
             <div key={v} className="macro-hgrid" style={{ bottom: `${(v / yMax) * 100}%` }} />
           ))}
+          {PERSONEN.filter(p => WORK_GOALS[p]).map(p => {
+            const goalH = mode === 'woche' ? WORK_GOALS[p].weekly / 7 : WORK_GOALS[p].weekly
+            return (
+              <div key={p} className={`work-goal-line ${slug(p)}`}
+                style={{ bottom: `${(goalH / yMax) * 100}%` }} />
+            )
+          })}
           {data.map((d, i) => (
             <div key={i} className="macro-day-col">
               <div className="macro-bars-group">
@@ -181,10 +191,17 @@ function Saeulendiagramm({ entries }) {
           ))}
         </div>
       </div>
-      <div className="chart-legend">
+      <div className="chart-legend" style={{ flexWrap: 'wrap', gap: '6px 14px' }}>
         {PERSONEN.map(p => (
           <span key={p} className="legend-item">
             <span className={`legend-dot ${slug(p)}`} />{p}
+            {WORK_GOALS[p] && (
+              <span className="legend-goal-text">
+                {mode === 'woche'
+                  ? ` — Ziel: ${fmtHours(WORK_GOALS[p].weekly / 7)}/Tag`
+                  : ` — Ziel: ${WORK_GOALS[p].weekly}h/Woche`}
+              </span>
+            )}
           </span>
         ))}
       </div>
@@ -240,6 +257,7 @@ export default function Arbeitszeiten() {
   const personEntries = entries.filter(e => e.person === person)
   const weekHours = personEntries.filter(e => inRange(e.date, monday, sunday))
     .reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0)
+  const weekGoal = WORK_GOALS[person]?.weekly ?? 0
 
   async function handleAdd(e) {
     e.preventDefault()
@@ -339,7 +357,19 @@ export default function Arbeitszeiten() {
 
           <div className={`week-summary ${slug(person)}-accent`}>
             <Clock size={18} />
-            <span>Diese Woche: <strong>{fmtHours(weekHours)}</strong></span>
+            <div style={{ flex: 1 }}>
+              <span>Diese Woche: <strong>{fmtHours(weekHours)}</strong>
+                {weekGoal > 0 && <span className="week-goal-label"> / {weekGoal}h Ziel</span>}
+              </span>
+              {weekGoal > 0 && (
+                <div className="week-goal-bar">
+                  <div className="week-goal-fill" style={{
+                    width: `${Math.min(100, (weekHours / weekGoal) * 100)}%`,
+                    background: `var(--${slug(person)})`,
+                  }} />
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="entries-list">

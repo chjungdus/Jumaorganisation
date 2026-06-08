@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase'
-import { PERSONEN, slug } from '../constants'
+import { PERSONEN, slug, WORK_GOALS } from '../constants'
 import { useGoals } from '../useGoals'
+
+function calcWorkHours(start, end) {
+  if (!start || !end) return 0
+  const [sh, sm] = start.split(':').map(Number)
+  const [eh, em] = end.split(':').map(Number)
+  return Math.max(0, (eh * 60 + em - sh * 60 - sm) / 60)
+}
+function fmtHours(h) {
+  const hours = Math.floor(h)
+  const mins = Math.round((h - hours) * 60)
+  if (hours === 0 && mins === 0) return '0h'
+  if (mins === 0) return `${hours}h`
+  if (hours === 0) return `${mins}min`
+  return `${hours}h ${mins}min`
+}
 
 function pad(n) { return String(n).padStart(2, '0') }
 function todayStr() {
@@ -17,6 +32,7 @@ export default function Dashboard() {
   const [workouts, setWorkouts] = useState([])
   const [makros, setMakros] = useState([])
   const [tagesbuch, setTagesbuch] = useState({})
+  const [arbeitszeiten, setArbeitszeiten] = useState([])
 
   useEffect(() => {
     const u1 = onSnapshot(collection(db, 'todos'), snap =>
@@ -33,7 +49,10 @@ export default function Dashboard() {
       snap.docs.forEach(d => { data[d.id] = d.data() })
       setTagesbuch(data)
     })
-    return () => { u1(); u2(); u3(); u4() }
+    const u5 = onSnapshot(collection(db, 'arbeitszeiten'), snap =>
+      setArbeitszeiten(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    )
+    return () => { u1(); u2(); u3(); u4(); u5() }
   }, [])
 
   const dateLabel = new Date().toLocaleDateString('de-DE', {
@@ -56,7 +75,12 @@ export default function Dashboard() {
         const personGoals = goals[person]
         const tb = tagesbuch[`${person}_${today}`]
         const hasDoneWorkout = todayWorkouts.some(w => w.done)
-        const allEmpty = openTodos.length === 0 && totalKcal === 0 && todayWorkouts.length === 0 && !tb
+        const workGoal = WORK_GOALS[person]
+        const dailyWorkGoal = workGoal ? workGoal.weekly / 7 : 0
+        const todayWorkHours = arbeitszeiten
+          .filter(e => e.person === person && e.date === today)
+          .reduce((s, e) => s + (e.hours ?? calcWorkHours(e.startTime, e.endTime)), 0)
+        const allEmpty = openTodos.length === 0 && totalKcal === 0 && todayWorkouts.length === 0 && !tb && !workGoal
 
         return (
           <div key={person} className={`card dash-card person-border-${slug(person)}`}>
@@ -94,6 +118,23 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
+
+            {workGoal && (
+              <div className="dash-work-section">
+                <div className="dash-macro-label">Arbeit heute</div>
+                <div className="dash-macro-val">
+                  <strong>{fmtHours(todayWorkHours)}</strong>
+                  <span className="dash-macro-unit"> / {fmtHours(dailyWorkGoal)}</span>
+                </div>
+                <div className="dash-track">
+                  <div className="dash-fill" style={{
+                    width: `${Math.min(100, dailyWorkGoal > 0 ? (todayWorkHours / dailyWorkGoal) * 100 : 0)}%`,
+                    background: `var(--${slug(person)})`,
+                    opacity: 0.55,
+                  }} />
+                </div>
+              </div>
+            )}
 
             <div className="dash-pills">
               <span className={`dash-pill ${hasDoneWorkout ? 'pill-green' : todayWorkouts.length > 0 ? 'pill-yellow' : 'pill-muted'}`}>
