@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { collection, addDoc, onSnapshot, serverTimestamp } from 'firebase/firestore'
 import { db } from '../firebase'
-import { X, Search, ChevronUp, ChevronDown, Star, Check } from 'lucide-react'
+import { X, Search, ChevronUp, ChevronDown, Star, Check, Camera } from 'lucide-react'
 import { PERSONEN, slug } from '../constants'
 
 function pad(n) { return String(n).padStart(2, '0') }
@@ -51,7 +51,12 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
   const [vorlagen, setVorlagen] = useState([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [fotoPreview, setFotoPreview] = useState(null)
+  const [fotoFile, setFotoFile] = useState(null)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analyzeError, setAnalyzeError] = useState(null)
   const inputRef = useRef(null)
+  const fotoInputRef = useRef(null)
   const dropdownTimerRef = useRef(null)
 
   useEffect(() => {
@@ -60,6 +65,61 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
     )
     return unsub
   }, [])
+
+  function handleFotoSelect(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setFotoFile(file)
+    setFotoPreview(URL.createObjectURL(file))
+    setAnalyzeError(null)
+  }
+
+  async function resizeToBase64(file, maxDim = 1024) {
+    return new Promise(resolve => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        const ratio = Math.min(maxDim / img.width, maxDim / img.height, 1)
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(img.width * ratio)
+        canvas.height = Math.round(img.height * ratio)
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+        resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1])
+      }
+      img.src = url
+    })
+  }
+
+  async function handleAnalyze() {
+    if (!fotoFile) return
+    setAnalyzing(true)
+    setAnalyzeError(null)
+    try {
+      const base64 = await resizeToBase64(fotoFile)
+      const res = await fetch('/api/analyze-food', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64, mediaType: 'image/jpeg' }),
+      })
+      const data = await res.json()
+      if (data.error) {
+        setAnalyzeError(data.error)
+      } else {
+        setManForm({
+          kcal:    String(data.kcal    || ''),
+          protein: String(data.protein || ''),
+          carbs:   String(data.carbs   || ''),
+          fat:     String(data.fat     || ''),
+        })
+        if (data.beschreibung) setMahlzeit(data.beschreibung)
+        setMode('manuell')
+      }
+    } catch {
+      setAnalyzeError('Verbindungsfehler — bitte nochmal versuchen')
+    }
+    setAnalyzing(false)
+  }
 
   const allFoods = [
     ...vorlagen.map(v => ({ ...v, isVorlage: true })),
@@ -161,6 +221,9 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
           <button className={`schnell-tab ${mode === 'suche' ? 'active' : ''}`} onClick={() => setMode('suche')}>
             <Search size={13} /> Suchen
           </button>
+          <button className={`schnell-tab ${mode === 'foto' ? 'active' : ''}`} onClick={() => setMode('foto')}>
+            <Camera size={13} /> Foto
+          </button>
           <button className={`schnell-tab ${mode === 'manuell' ? 'active' : ''}`} onClick={() => setMode('manuell')}>
             ✏️ Manuell
           </button>
@@ -220,6 +283,48 @@ export default function SchnellEintrag({ defaultPerson, onClose }) {
               </div>
             )}
           </>
+        )}
+
+        {/* Foto-Modus */}
+        {mode === 'foto' && (
+          <div className="foto-mode">
+            <input
+              ref={fotoInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              style={{ display: 'none' }}
+              onChange={handleFotoSelect}
+            />
+            {!fotoPreview ? (
+              <button className="foto-upload-btn" onClick={() => fotoInputRef.current?.click()}>
+                <Camera size={36} />
+                <span>Foto aufnehmen oder auswählen</span>
+                <span className="foto-hint">Kamera oder Galerie</span>
+              </button>
+            ) : (
+              <div className="foto-preview-wrap">
+                <img src={fotoPreview} className="foto-preview" alt="Essen" />
+                <button className="foto-change-btn" onClick={() => fotoInputRef.current?.click()}>
+                  Anderes Foto
+                </button>
+              </div>
+            )}
+            {analyzeError && (
+              <div className="foto-error">{analyzeError}</div>
+            )}
+            {fotoPreview && !analyzing && (
+              <button className="btn-primary foto-analyze-btn" onClick={handleAnalyze}>
+                ✨ Makros mit Claude erkennen
+              </button>
+            )}
+            {analyzing && (
+              <div className="foto-analyzing">
+                <span className="foto-spinner" />
+                Claude analysiert dein Essen…
+              </div>
+            )}
+          </div>
         )}
 
         {/* Suchfeld (nur im Such-Modus) */}

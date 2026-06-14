@@ -1517,3 +1517,40 @@ body {
 .schnell-tab.active {
   background: var(--primary-light); border-color: var(--primary); color: var(--primary);
 }
+
+/* ── Foto-Modus ───────────────────────────────── */
+.foto-mode { display: flex; flex-direction: column; gap: 12px; }
+.foto-upload-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 32px 20px; border-radius: var(--radius);
+  border: 2px dashed var(--border-bright); background: var(--bg2);
+  color: var(--text-muted); cursor: pointer; width: 100%;
+  font-family: inherit; transition: border-color 0.15s, color 0.15s;
+}
+.foto-upload-btn:hover { border-color: var(--primary); color: var(--primary); }
+.foto-upload-btn span { font-size: 14px; font-weight: 600; }
+.foto-hint { font-size: 12px; font-weight: 400; opacity: 0.6; }
+.foto-preview-wrap { position: relative; border-radius: var(--radius); overflow: hidden; }
+.foto-preview { width: 100%; max-height: 240px; object-fit: cover; display: block; border-radius: var(--radius); }
+.foto-change-btn {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.6); color: #fff; border: none;
+  border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; backdrop-filter: blur(4px);
+}
+.foto-analyze-btn { width: 100%; margin-top: 4px; }
+.foto-error {
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35);
+  color: #f87171; border-radius: var(--radius-sm); padding: 10px 14px;
+  font-size: 13px; font-weight: 500;
+}
+.foto-analyzing {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+  padding: 14px; color: var(--primary); font-size: 14px; font-weight: 600;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.foto-spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid rgba(91,91,214,0.25); border-top-color: var(--primary);
+  border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
+}
