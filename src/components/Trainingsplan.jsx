@@ -7,6 +7,69 @@ import { db } from '../firebase'
 import { Plus, X, Trash2, Edit2, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { PERSONEN, slug } from '../constants'
 
+const WOCHENPLAN = [
+  {
+    tag: 'Montag', emoji: '💪', fokus: 'Rücken',
+    exercises: [
+      { name: 'Klimmzüge', sets: 4, reps: '6–8' },
+      { name: 'Latzug (Untergriff)', sets: 3, reps: '12' },
+      { name: 'Kabelrudern', sets: 3, reps: '12' },
+      { name: 'Face Pulls', sets: 3, reps: '15' },
+      { name: 'Bizeps Curls', sets: 3, reps: '12' },
+    ],
+  },
+  {
+    tag: 'Dienstag', emoji: '🏋️', fokus: 'Schultern',
+    exercises: [
+      { name: 'Schulterdrücken (Kurzhantel)', sets: 4, reps: '10' },
+      { name: 'Seitheben', sets: 4, reps: '15' },
+      { name: 'Vorgebeugtes Seitheben', sets: 3, reps: '12' },
+      { name: 'Arnold Press', sets: 3, reps: '10' },
+      { name: 'Shrugs', sets: 3, reps: '15' },
+    ],
+  },
+  {
+    tag: 'Mittwoch', emoji: '😴', fokus: 'Ruhetag',
+    exercises: [],
+    rest: true,
+  },
+  {
+    tag: 'Donnerstag', emoji: '💪', fokus: 'Arme',
+    exercises: [
+      { name: 'Bizeps Curls (Langhantel)', sets: 4, reps: '10' },
+      { name: 'Hammer Curls', sets: 3, reps: '12' },
+      { name: 'Trizeps Dips', sets: 3, reps: '12' },
+      { name: 'Seildrücken (Trizeps)', sets: 3, reps: '15' },
+      { name: 'Skull Crushers', sets: 3, reps: '12' },
+    ],
+  },
+  {
+    tag: 'Freitag', emoji: '🏋️', fokus: 'Rücken + Schultern',
+    exercises: [
+      { name: 'Klimmzüge', sets: 3, reps: 'max' },
+      { name: 'Einarm-Kurzhantelrudern', sets: 3, reps: '12' },
+      { name: 'Seitheben', sets: 4, reps: '15' },
+      { name: 'Face Pulls', sets: 3, reps: '15' },
+      { name: 'Reverse Flyes', sets: 3, reps: '12' },
+    ],
+  },
+  {
+    tag: 'Samstag', emoji: '🦵', fokus: 'Beine + Waden',
+    exercises: [
+      { name: 'Kniebeugen', sets: 4, reps: '10' },
+      { name: 'Beinpresse', sets: 3, reps: '12' },
+      { name: 'Ausfallschritte', sets: 3, reps: '10/Seite' },
+      { name: 'Wadenheben stehend', sets: 5, reps: '20' },
+      { name: 'Wadenheben sitzend', sets: 4, reps: '20' },
+    ],
+  },
+  {
+    tag: 'Sonntag', emoji: '😴', fokus: 'Ruhetag',
+    exercises: [],
+    rest: true,
+  },
+]
+
 const VORLAGEN = [
   { name: 'Push Day',  exercises: ['Bankdrücken', 'Schulterdrücken', 'Trizeps-Dips', 'Fliegende', 'Seitheben'] },
   { name: 'Pull Day',  exercises: ['Klimmzüge', 'Rudern', 'Bizeps-Curls', 'Latzug', 'Face Pulls'] },
@@ -195,6 +258,7 @@ export default function Trainingsplan() {
 
       <div className="view-toggle">
         <button className={`view-toggle-btn ${view === 'heute' ? 'active' : ''}`} onClick={() => setView('heute')}>Heute</button>
+        <button className={`view-toggle-btn ${view === 'wochenplan' ? 'active' : ''}`} onClick={() => setView('wochenplan')}>📅 Wochenplan</button>
         <button className={`view-toggle-btn ${view === 'historie' ? 'active' : ''}`} onClick={() => setView('historie')}>Historie</button>
         <button className={`view-toggle-btn ${view === 'vorlagen' ? 'active' : ''}`} onClick={() => setView('vorlagen')}>Vorlagen</button>
       </div>
@@ -249,6 +313,36 @@ export default function Trainingsplan() {
             <WorkoutCard key={w.id} workout={w} onDelete={handleDelete} onToggleDone={toggleDone} onEdit={startEdit} onToggleExercise={toggleExercise} />
           ))}
         </>
+      )}
+
+      {view === 'wochenplan' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="ep-day-title" style={{ marginBottom: 4 }}>
+            <span className="person-chip chip-mateo" style={{ fontSize: 13 }}>Mateo</span>
+            <span style={{ marginLeft: 8, fontSize: 13, color: 'var(--text-secondary)' }}>Fokus: Schultern · Rücken · Waden · Arme</span>
+          </div>
+          {WOCHENPLAN.map(({ tag, emoji, fokus, exercises, rest }) => (
+            <div key={tag} className={`card workout-card${rest ? ' workout-done' : ''}`}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: rest ? 0 : 10 }}>
+                <div>
+                  <span style={{ fontWeight: 700, fontSize: 15 }}>{emoji} {tag}</span>
+                  <span style={{ marginLeft: 8, fontSize: 13, color: 'var(--text-secondary)' }}>{fokus}</span>
+                </div>
+                {!rest && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{exercises.length} Übungen</span>}
+              </div>
+              {!rest && (
+                <div className="workout-exercises" style={{ paddingTop: 0 }}>
+                  {exercises.map((ex, i) => (
+                    <div key={i} className="workout-exercise-row">
+                      <span className="workout-ex-name">{ex.name}</span>
+                      <span className="workout-ex-info">{ex.sets}×{ex.reps}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       )}
 
       {view === 'vorlagen' && (

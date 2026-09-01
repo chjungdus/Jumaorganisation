@@ -9,10 +9,11 @@ import Makros from './components/Makros'
 import Trainingsplan from './components/Trainingsplan'
 import Tagesbuch from './components/Tagesbuch'
 import Rezepte from './components/Rezepte'
+import Essensplan from './components/Essensplan'
 import Erinnerungen from './components/Erinnerungen'
 import {
   Home, Calendar, CheckSquare, Dumbbell, MoreHorizontal,
-  Clock, FileText, Utensils, BookOpen, ChefHat, Bell,
+  Clock, FileText, Utensils, BookOpen, ChefHat, Bell, Apple,
 } from 'lucide-react'
 
 const MAIN_TABS = [
@@ -26,6 +27,7 @@ const MEHR_TABS = [
   { id: 'makros',        label: 'Makros',        Icon: Utensils,  Component: Makros },
   { id: 'tagesbuch',     label: 'Tagesbuch',     Icon: BookOpen,  Component: Tagesbuch },
   { id: 'rezepte',       label: 'Rezepte',       Icon: ChefHat,   Component: Rezepte },
+  { id: 'essensplan',   label: 'Essensplan',    Icon: Apple,     Component: Essensplan },
   { id: 'notizen',       label: 'Notizen',       Icon: FileText,  Component: Notizen },
   { id: 'erinnerungen',  label: 'Erinnerungen',  Icon: Bell,      Component: Erinnerungen },
   { id: 'arbeitszeiten', label: 'Arbeitszeiten', Icon: Clock,     Component: Arbeitszeiten },

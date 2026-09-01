@@ -1554,3 +1554,55 @@ body {
   border: 2px solid rgba(91,91,214,0.25); border-top-color: var(--primary);
   border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0;
 }
+
+/* ── Essensplan ────────────────────────────────── */
+.ep-week-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px; margin: 0 16px 10px;
+}
+.ep-week-btn {
+  background: none; border: none; color: var(--text-secondary);
+  cursor: pointer; padding: 4px; display: flex; align-items: center;
+}
+.ep-week-btn:disabled { opacity: 0.25; cursor: default; }
+.ep-day-tabs {
+  display: flex; gap: 4px; padding: 0 16px; margin-bottom: 10px; overflow-x: auto;
+}
+.ep-day-tab {
+  flex: 1; min-width: 36px; padding: 7px 4px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text-secondary); border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; white-space: nowrap;
+  transition: all 0.15s;
+}
+.ep-day-tab.active {
+  background: var(--primary-light); border-color: var(--primary);
+  color: var(--primary);
+}
+.ep-day-title {
+  padding: 0 16px 8px; font-size: 15px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center;
+}
+.ep-summary {
+  margin: 0 16px 12px; display: flex; align-items: center;
+  justify-content: space-around; padding: 12px 16px;
+}
+.ep-summary-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ep-summary-item span { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.ep-summary-item strong { font-size: 15px; font-weight: 700; }
+.ep-summary-sep { width: 1px; height: 32px; background: var(--border); }
+.ep-meals { display: flex; flex-direction: column; gap: 8px; padding: 0 16px; }
+.ep-meal-card { padding: 12px 14px; }
+.ep-meal-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+}
+.ep-meal-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.ep-alt-btn {
+  display: flex; align-items: center; gap: 5px; background: var(--card2);
+  border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px;
+  color: var(--text-secondary); font-size: 12px; cursor: pointer;
+  transition: all 0.15s;
+}
+.ep-alt-btn:active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.ep-meal-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.ep-meal-macros { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+.ep-macro-sep { color: var(--border-bright); }
