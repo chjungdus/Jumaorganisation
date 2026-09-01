@@ -4,7 +4,7 @@ import { db } from './firebase'
 import { PERSONEN, slug } from './constants'
 
 export const GOAL_DEFAULTS = {
-  'Mateo':    { kcal: 3000, protein: 130, carbs: 392, fat: 112 },
+  'Mateo':    { kcal: 3300, protein: 130, carbs: 392, fat: 112 },
   'Zhuo Jun': { kcal: 2200, protein: 105, carbs: 245, fat: 70 },
   'Julius':   { kcal: 2400, protein: 110, carbs: 260, fat: 75 },
 }
