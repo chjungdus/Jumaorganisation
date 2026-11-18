@@ -89,27 +89,25 @@ function niceMaxH(maxH) {
 
 const TODAY = new Date().toISOString().split('T')[0]
 
-function CompCard({ label, h1, h2 }) {
-  const p1 = PERSONEN[0], p2 = PERSONEN[1]
-  const max = Math.max(h1, h2, 0.01)
-  const winner = h1 > h2 ? p1 : h2 > h1 ? p2 : null
+function CompCard({ label, hours }) {
+  const max = Math.max(...hours, 0.01)
+  const top = Math.max(...hours)
+  const winners = PERSONEN.filter((_, i) => hours[i] === top)
+  const winner = PERSONEN.length > 1 && top > 0 && winners.length === 1 ? winners[0] : null
   return (
     <div className="comp-card card">
       <div className="comp-card-title">
         {label}
         {winner && <span className="comp-winner-badge">🏆 {winner}</span>}
-        {!winner && (h1 > 0 || h2 > 0) && <span className="comp-winner-badge" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>Gleichstand</span>}
+        {PERSONEN.length > 1 && !winner && top > 0 && <span className="comp-winner-badge" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)' }}>Gleichstand</span>}
       </div>
-      <div className="comp-row">
-        <span className={`comp-name ${slug(p1)}`}>{p1}</span>
-        <div className="comp-track"><div className={`comp-fill ${slug(p1)}`} style={{ width: `${(h1 / max) * 100}%` }} /></div>
-        <span className="comp-hours">{fmtHours(h1)}</span>
-      </div>
-      <div className="comp-row">
-        <span className={`comp-name ${slug(p2)}`}>{p2}</span>
-        <div className="comp-track"><div className={`comp-fill ${slug(p2)}`} style={{ width: `${(h2 / max) * 100}%` }} /></div>
-        <span className="comp-hours">{fmtHours(h2)}</span>
-      </div>
+      {PERSONEN.map((p, i) => (
+        <div key={p} className="comp-row">
+          <span className={`comp-name ${slug(p)}`}>{p}</span>
+          <div className="comp-track"><div className={`comp-fill ${slug(p)}`} style={{ width: `${(hours[i] / max) * 100}%` }} /></div>
+          <span className="comp-hours">{fmtHours(hours[i])}</span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -210,21 +208,17 @@ function Saeulendiagramm({ entries }) {
 }
 
 function StatistikView({ entries }) {
-  const p1 = PERSONEN[0], p2 = PERSONEN[1]
   const { monday, sunday } = getWeekBounds()
   const { start: mStart, end: mEnd } = getCurrentMonthBounds()
-  const wH1 = hoursForPerson(entries, p1, monday, sunday)
-  const wH2 = hoursForPerson(entries, p2, monday, sunday)
-  const mH1 = hoursForPerson(entries, p1, mStart, mEnd)
-  const mH2 = hoursForPerson(entries, p2, mStart, mEnd)
-  const totalH1 = entries.filter(e => e.person === p1).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0)
-  const totalH2 = entries.filter(e => e.person === p2).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0)
+  const week = PERSONEN.map(p => hoursForPerson(entries, p, monday, sunday))
+  const month = PERSONEN.map(p => hoursForPerson(entries, p, mStart, mEnd))
+  const total = PERSONEN.map(p => entries.filter(e => e.person === p).reduce((s, e) => s + calcHours(e.startTime, e.endTime), 0))
   return (
     <div className="statistik-view">
-      <div className="stat-section-title">Vergleich</div>
-      <CompCard label="Diese Woche" h1={wH1} h2={wH2} />
-      <CompCard label="Dieser Monat" h1={mH1} h2={mH2} />
-      <CompCard label="Gesamt" h1={totalH1} h2={totalH2} />
+      <div className="stat-section-title">Übersicht</div>
+      <CompCard label="Diese Woche" hours={week} />
+      <CompCard label="Dieser Monat" hours={month} />
+      <CompCard label="Gesamt" hours={total} />
       <div className="stat-section-title">Säulendiagramm</div>
       <Saeulendiagramm entries={entries} />
     </div>

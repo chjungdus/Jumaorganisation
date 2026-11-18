@@ -188,13 +188,11 @@ export default function Tagesbuch() {
       <div className="card tb-week-grid">
         {weeks.map(d => {
           const e1 = entryFor(PERSONEN[0], d)
-          const e2 = entryFor(PERSONEN[1], d)
           const label = d === today ? 'Heute' : new Date(d + 'T00:00:00').toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric' })
           return (
             <div key={d} className={`tb-week-day ${d === date ? 'tb-day-active' : ''}`} onClick={() => setDate(d)}>
               <span className="tb-day-label">{label}</span>
               <span>{e1.stimmung ? MOOD_LABELS[e1.stimmung].split(' ')[0] : '·'}</span>
-              <span>{e2.stimmung ? MOOD_LABELS[e2.stimmung].split(' ')[0] : '·'}</span>
             </div>
           )
         })}
