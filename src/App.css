@@ -1606,3 +1606,32 @@ body {
 .ep-meal-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 .ep-meal-macros { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
 .ep-macro-sep { color: var(--border-bright); }
+
+/* ── Übungsanleitung ──────────────────────────── */
+.exd-btn { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border-bright); background: transparent; color: var(--text-secondary); border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; font-family: inherit; cursor: pointer; flex-shrink: 0; }
+.exd-btn:hover, .exd-btn.open { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.exd-line { display: flex; flex-direction: column; gap: 6px; }
+.exd-line-row { display: flex; align-items: center; gap: 8px; }
+.exd-line-row .workout-ex-name { flex: 1; min-width: 0; }
+.exd-panel { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
+.exd-panel h4 { margin: 8px 0 0; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--primary); }
+.exd-panel p, .exd-panel li { font-size: 13px; line-height: 1.5; color: var(--text); margin: 0; }
+.exd-panel ol, .exd-panel ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.exd-muscles { font-size: 12px; color: var(--text-secondary); }
+.exd-muscles span { font-weight: 700; color: var(--text); }
+.exd-none { font-size: 12px; color: var(--text-muted); margin: 0; }
+.exd-svg { width: 100%; max-width: 340px; height: auto; align-self: center; background: var(--bg2, rgba(0,0,0,0.15)); border-radius: 10px; }
+.exd-floor { stroke: var(--border-bright); stroke-width: 2; stroke-linecap: round; }
+.exd-seg { fill: none; stroke: var(--text-secondary); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.exd-seg.hl { stroke: var(--primary); }
+.exd-seg.back { opacity: 0.55; }
+.exd-head { fill: none; stroke: var(--text-secondary); stroke-width: 4; }
+.exd-weight { fill: var(--text); stroke: var(--bg2, #000); stroke-width: 1.5; }
+.exd-plate { stroke: var(--text); stroke-width: 6; stroke-linecap: round; }
+.exd-cable { stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 3 3; }
+.exd-equip { stroke: var(--border-bright); stroke-width: 6; stroke-linecap: round; }
+.exd-equip.thin { stroke-width: 3; }
+.exd-equip-dot { fill: var(--border-bright); }
+.exd-ghost { opacity: 0.16; }
+.exd-ghost .exd-seg, .exd-ghost .exd-head { stroke: var(--text); }
+.exd-ghost .exd-seg.hl { stroke: var(--text); }

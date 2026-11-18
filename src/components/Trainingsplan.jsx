@@ -6,6 +6,7 @@ import {
 import { db } from '../firebase'
 import { Plus, X, Trash2, Edit2, Check, ChevronDown, ChevronUp } from 'lucide-react'
 import { PERSONEN, slug } from '../constants'
+import { ExerciseGuide, GuideButton, useGuide } from './ExerciseInfo'
 
 const WOCHENPLAN = [
   {
@@ -13,7 +14,7 @@ const WOCHENPLAN = [
     exercises: [
       { name: 'Chest Press', sets: 3, reps: '6–10' },
       { name: 'Lat Pulldown', sets: 3, reps: '8–12' },
-      { name: 'Schulterdrücken', sets: 3, reps: '8–10' },
+      { name: 'Schulterdrücken (Maschine)', sets: 3, reps: '8–10' },
       { name: 'Kabelrudern', sets: 3, reps: '8–12' },
       { name: 'Seitheben', sets: 3, reps: '12–20' },
       { name: 'Wadenheben stehend', sets: 4, reps: '8–12' },
@@ -23,8 +24,7 @@ const WOCHENPLAN = [
     tag: 'Dienstag', emoji: '🦵', fokus: 'Beine schwer + Waden',
     exercises: [
       { name: 'Beinpresse', sets: 4, reps: '6–10' },
-      { name: 'Rumänisches Kreuzheben', sets: 3, reps: '8–10' },
-      { name: 'Leg Curl', sets: 3, reps: '10–12' },
+      { name: 'Leg Curl sitzend', sets: 4, reps: '10–12' },
       { name: 'Beinstrecker', sets: 3, reps: '10–15' },
       { name: 'Wadenheben sitzend', sets: 4, reps: '10–15' },
     ],
@@ -32,7 +32,7 @@ const WOCHENPLAN = [
   {
     tag: 'Mittwoch', emoji: '💪', fokus: 'Oberkörper B (+ Fußballtraining)',
     exercises: [
-      { name: 'Schrägbankdrücken', sets: 3, reps: '8–12' },
+      { name: 'Schrägdrücken (Maschine)', sets: 3, reps: '8–12' },
       { name: 'Vertical Row', sets: 3, reps: '8–12' },
       { name: 'Latzug (enger Griff)', sets: 3, reps: '8–12' },
       { name: 'Butterfly', sets: 2, reps: '10–15' },
@@ -44,16 +44,16 @@ const WOCHENPLAN = [
     tag: 'Donnerstag', emoji: '🦵', fokus: 'Beine leichter + Waden',
     exercises: [
       { name: 'Beinpresse', sets: 3, reps: '10–12' },
-      { name: 'Leg Curl', sets: 3, reps: '10–12' },
+      { name: 'Leg Curl sitzend', sets: 3, reps: '10–12' },
       { name: 'Ausfallschritte', sets: 2, reps: '10/Seite' },
       { name: 'Wadenheben stehend', sets: 4, reps: '10–15' },
-      { name: 'Bauch', sets: 2, reps: '10–15' },
+      { name: 'Crunches', sets: 2, reps: '10–15' },
     ],
   },
   {
     tag: 'Freitag', emoji: '🏋️', fokus: 'Schultern, Arme, Unterarme',
     exercises: [
-      { name: 'Schulterdrücken (Kurzhantel)', sets: 3, reps: '8–12' },
+      { name: 'Schulterdrücken (Maschine)', sets: 3, reps: '8–12' },
       { name: 'Seitheben am Kabel', sets: 4, reps: '12–20' },
       { name: 'Reverse Butterfly', sets: 3, reps: '12–15' },
       { name: 'Bizepscurls', sets: 3, reps: '8–12' },
@@ -119,6 +119,40 @@ function ExerciseInput({ exercises, onChange }) {
   )
 }
 
+function PlanExerciseRow({ ex }) {
+  const [open, toggle] = useGuide()
+  return (
+    <div className="exd-line">
+      <div className="workout-exercise-row exd-line-row">
+        <span className="workout-ex-name">{ex.name}</span>
+        <span className="workout-ex-info">{ex.sets}×{ex.reps}</span>
+        <GuideButton open={open} onClick={toggle} />
+      </div>
+      {open && <ExerciseGuide name={ex.name} />}
+    </div>
+  )
+}
+
+function WorkoutExerciseRow({ workoutId, ex, index, exercises, onToggleExercise }) {
+  const [open, toggle] = useGuide()
+  return (
+    <div className="exd-line">
+      <div className="workout-exercise-row exd-line-row">
+        <button
+          className={`checkbox ${ex.done ? 'checked' : ''}`}
+          onClick={() => onToggleExercise(workoutId, index, exercises)}
+        >
+          {ex.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20,6 9,17 4,12" /></svg>}
+        </button>
+        <span className={`workout-ex-name${ex.done ? ' workout-ex-done' : ''}`}>{ex.name || '—'}</span>
+        <span className="workout-ex-info">{ex.sets}×{ex.reps}{ex.weight ? ` · ${ex.weight}kg` : ''}</span>
+        <GuideButton open={open} onClick={toggle} />
+      </div>
+      {open && <ExerciseGuide name={ex.name} />}
+    </div>
+  )
+}
+
 function WorkoutCard({ workout, onDelete, onToggleDone, onEdit, onToggleExercise }) {
   const [expanded, setExpanded] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -156,16 +190,8 @@ function WorkoutCard({ workout, onDelete, onToggleDone, onEdit, onToggleExercise
       {expanded && workout.exercises?.length > 0 && (
         <div className="workout-exercises">
           {workout.exercises.map((ex, i) => (
-            <div key={i} className="workout-exercise-row">
-              <button
-                className={`checkbox ${ex.done ? 'checked' : ''}`}
-                onClick={() => onToggleExercise(workout.id, i, workout.exercises)}
-              >
-                {ex.done && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20,6 9,17 4,12" /></svg>}
-              </button>
-              <span className={`workout-ex-name${ex.done ? ' workout-ex-done' : ''}`}>{ex.name || '—'}</span>
-              <span className="workout-ex-info">{ex.sets}×{ex.reps}{ex.weight ? ` · ${ex.weight}kg` : ''}</span>
-            </div>
+            <WorkoutExerciseRow key={i} workoutId={workout.id} ex={ex} index={i}
+              exercises={workout.exercises} onToggleExercise={onToggleExercise} />
           ))}
           {workout.notes && <p className="workout-notes">{workout.notes}</p>}
         </div>
@@ -334,12 +360,7 @@ export default function Trainingsplan() {
               </div>
               {!rest && (
                 <div className="workout-exercises" style={{ paddingTop: 0 }}>
-                  {exercises.map((ex, i) => (
-                    <div key={i} className="workout-exercise-row">
-                      <span className="workout-ex-name">{ex.name}</span>
-                      <span className="workout-ex-info">{ex.sets}×{ex.reps}</span>
-                    </div>
-                  ))}
+                  {exercises.map((ex, i) => <PlanExerciseRow key={i} ex={ex} />)}
                 </div>
               )}
             </div>
