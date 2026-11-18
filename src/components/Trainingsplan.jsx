@@ -8,77 +8,105 @@ import { Plus, X, Trash2, Edit2, Check, ChevronDown, ChevronUp } from 'lucide-re
 import { PERSONEN, slug } from '../constants'
 import { ExerciseGuide, GuideButton, useGuide } from './ExerciseInfo'
 
-const WOCHENPLAN = [
-  {
-    tag: 'Montag', emoji: '💪', fokus: 'Oberkörper A + Waden (+ Fußballtraining)',
+// Push / Pull / Beine, jeweils zweimal pro Woche
+const EINHEITEN = {
+  pushA: {
+    name: 'Push A', emoji: '💪', fokus: 'Brust, Schultern, Trizeps',
     exercises: [
       { name: 'Chest Press', sets: 3, reps: '6–10' },
-      { name: 'Lat Pulldown', sets: 3, reps: '8–12' },
       { name: 'Schulterdrücken (Maschine)', sets: 3, reps: '8–10' },
-      { name: 'Kabelrudern', sets: 3, reps: '8–12' },
-      { name: 'Seitheben', sets: 3, reps: '12–20' },
-      { name: 'Wadenheben stehend', sets: 4, reps: '8–12' },
+      { name: 'Butterfly', sets: 2, reps: '10–15' },
+      { name: 'Seitheben', sets: 4, reps: '12–20' },
+      { name: 'Trizepsdrücken', sets: 3, reps: '10–15' },
     ],
   },
-  {
-    tag: 'Dienstag', emoji: '🦵', fokus: 'Beine schwer + Waden',
+  pushB: {
+    name: 'Push B', emoji: '💪', fokus: 'Brust, Schultern, Trizeps',
+    exercises: [
+      { name: 'Schrägdrücken (Maschine)', sets: 3, reps: '8–12' },
+      { name: 'Schulterdrücken (Maschine)', sets: 3, reps: '10–12' },
+      { name: 'Seitheben am Kabel', sets: 4, reps: '12–20' },
+      { name: 'Trizepsdrücken', sets: 3, reps: '10–15' },
+    ],
+  },
+  pullA: {
+    name: 'Pull A', emoji: '🏋️', fokus: 'Rücken, Bizeps, Unterarme',
+    exercises: [
+      { name: 'Lat Pulldown', sets: 3, reps: '8–12' },
+      { name: 'Vertical Row', sets: 3, reps: '8–12' },
+      { name: 'Face Pulls', sets: 3, reps: '12–15' },
+      { name: 'Bizepscurls', sets: 3, reps: '8–12' },
+      { name: 'Reverse Curls', sets: 3, reps: '12–20' },
+    ],
+  },
+  pullB: {
+    name: 'Pull B', emoji: '🏋️', fokus: 'Rücken, Bizeps, Unterarme',
+    exercises: [
+      { name: 'Latzug (enger Griff)', sets: 3, reps: '8–12' },
+      { name: 'Kabelrudern', sets: 3, reps: '8–12' },
+      { name: 'Reverse Butterfly', sets: 3, reps: '12–15' },
+      { name: 'Hammercurls', sets: 3, reps: '10–12' },
+      { name: 'Reverse Curls', sets: 3, reps: '12–20' },
+    ],
+  },
+  legsA: {
+    name: 'Beine schwer', emoji: '🦵', fokus: 'Beine + Waden',
     exercises: [
       { name: 'Beinpresse', sets: 4, reps: '6–10' },
       { name: 'Leg Curl sitzend', sets: 4, reps: '10–12' },
       { name: 'Beinstrecker', sets: 3, reps: '10–15' },
+      { name: 'Wadenheben stehend', sets: 4, reps: '8–12' },
       { name: 'Wadenheben sitzend', sets: 4, reps: '10–15' },
     ],
   },
-  {
-    tag: 'Mittwoch', emoji: '💪', fokus: 'Oberkörper B (+ Fußballtraining)',
-    exercises: [
-      { name: 'Schrägdrücken (Maschine)', sets: 3, reps: '8–12' },
-      { name: 'Vertical Row', sets: 3, reps: '8–12' },
-      { name: 'Latzug (enger Griff)', sets: 3, reps: '8–12' },
-      { name: 'Butterfly', sets: 2, reps: '10–15' },
-      { name: 'Seitheben', sets: 3, reps: '12–20' },
-      { name: 'Face Pulls', sets: 3, reps: '12–15' },
-    ],
-  },
-  {
-    tag: 'Donnerstag', emoji: '🦵', fokus: 'Beine leichter + Waden',
+  legsB: {
+    name: 'Beine leichter', emoji: '🦵', fokus: 'Beine + Waden (vor dem Spiel)',
     exercises: [
       { name: 'Beinpresse', sets: 3, reps: '10–12' },
       { name: 'Leg Curl sitzend', sets: 3, reps: '10–12' },
       { name: 'Ausfallschritte', sets: 2, reps: '10/Seite' },
       { name: 'Wadenheben stehend', sets: 4, reps: '10–15' },
-      { name: 'Crunches', sets: 2, reps: '10–15' },
+      { name: 'Wadenheben sitzend', sets: 3, reps: '12–20' },
     ],
   },
-  {
-    tag: 'Freitag', emoji: '🏋️', fokus: 'Schultern, Arme, Unterarme',
-    exercises: [
-      { name: 'Schulterdrücken (Maschine)', sets: 3, reps: '8–12' },
-      { name: 'Seitheben am Kabel', sets: 4, reps: '12–20' },
-      { name: 'Reverse Butterfly', sets: 3, reps: '12–15' },
-      { name: 'Bizepscurls', sets: 3, reps: '8–12' },
-      { name: 'Trizepsdrücken', sets: 3, reps: '10–15' },
-      { name: 'Hammercurls', sets: 2, reps: '10–12' },
-      { name: 'Reverse Curls', sets: 3, reps: '12–20' },
-    ],
-  },
-  {
-    tag: 'Samstag', emoji: '😴', fokus: 'Pause',
-    exercises: [],
-    rest: true,
-  },
-  {
-    tag: 'Sonntag', emoji: '⚽', fokus: 'Spiel',
-    exercises: [],
-    rest: true,
-  },
-]
+}
 
-// Vorlagen = die Trainingstage aus dem Wochenplan
-const VORLAGEN = WOCHENPLAN.filter(d => !d.rest).map(d => ({
-  name: `${d.tag}: ${d.fokus.replace(' (+ Fußballtraining)', '')}`,
-  exercises: d.exercises,
-}))
+// [Wochentag, Einheit, Zusatz] – das Spiel ist der Ruhetag, Montag und Mittwoch sind beinfrei
+const WOCHEN = {
+  sonntag: [
+    ['Montag', 'pushA', 'Fußballtraining'],
+    ['Dienstag', 'legsA'],
+    ['Mittwoch', 'pullA', 'Fußballtraining'],
+    ['Donnerstag', 'pushB'],
+    ['Freitag', 'legsB'],
+    ['Samstag', 'pullB'],
+    ['Sonntag', null],
+  ],
+  samstag: [
+    ['Sonntag', 'pushA'],
+    ['Montag', 'pullA', 'Fußballtraining'],
+    ['Dienstag', 'legsA'],
+    ['Mittwoch', 'pushB', 'Fußballtraining'],
+    ['Donnerstag', 'legsB'],
+    ['Freitag', 'pullB'],
+    ['Samstag', null],
+  ],
+}
+
+function buildWoche(spiel) {
+  return WOCHEN[spiel].map(([tag, key, extra]) => {
+    if (!key) return { tag, emoji: '⚽', fokus: 'Spiel – kein Studio', exercises: [], rest: true }
+    const e = EINHEITEN[key]
+    return {
+      tag, emoji: e.emoji,
+      fokus: `${e.name} · ${e.fokus}${extra ? ` (+ ${extra})` : ''}`,
+      exercises: e.exercises,
+    }
+  })
+}
+
+// Vorlagen = die sechs Trainingseinheiten
+const VORLAGEN = Object.values(EINHEITEN).map(e => ({ name: e.name, exercises: e.exercises }))
 
 function pad(n) { return String(n).padStart(2, '0') }
 function todayStr() {
@@ -211,6 +239,14 @@ export default function Trainingsplan() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
+  const [spiel, setSpielState] = useState(() => {
+    try { return localStorage.getItem('spielTag') === 'samstag' ? 'samstag' : 'sonntag' } catch { return 'sonntag' }
+  })
+  function setSpiel(v) {
+    setSpielState(v)
+    try { localStorage.setItem('spielTag', v) } catch { /* ignorieren */ }
+  }
+  const wochenplan = buildWoche(spiel)
 
   useEffect(() => {
     const q = query(collection(db, 'training'), orderBy('date', 'desc'))
@@ -347,9 +383,13 @@ export default function Trainingsplan() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div className="ep-day-title" style={{ marginBottom: 4 }}>
             <span className="person-chip chip-mateo" style={{ fontSize: 13 }}>Mateo</span>
-            <span style={{ marginLeft: 8, fontSize: 13, color: 'var(--text-secondary)' }}>Fokus: Muskelaufbau · Schultern · Waden · Arme</span>
+            <span style={{ marginLeft: 8, fontSize: 13, color: 'var(--text-secondary)' }}>Push / Pull / Beine · 2× pro Woche</span>
           </div>
-          {WOCHENPLAN.map(({ tag, emoji, fokus, exercises, rest }) => (
+          <div className="view-toggle">
+            <button className={`view-toggle-btn ${spiel === 'sonntag' ? 'active' : ''}`} onClick={() => setSpiel('sonntag')}>⚽ Spiel Sonntag</button>
+            <button className={`view-toggle-btn ${spiel === 'samstag' ? 'active' : ''}`} onClick={() => setSpiel('samstag')}>⚽ Spiel Samstag</button>
+          </div>
+          {wochenplan.map(({ tag, emoji, fokus, exercises, rest }) => (
             <div key={tag} className={`card workout-card${rest ? ' workout-done' : ''}`}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: rest ? 0 : 10 }}>
                 <div>
