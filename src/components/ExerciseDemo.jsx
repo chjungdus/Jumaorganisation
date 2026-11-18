@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 // 180° = nach oben, 270° = nach hinten/links), dadurch bleiben die Gliedmaßen immer gleich lang.
 
 const GROUND = 142
-const L = { torso: 44, ua: 25, fa: 23, th: 36, sh: 36, head: 8, foot: 15 }
+const L = { torso: 44, ua: 25, fa: 23, th: 36, sh: 36, head: 8, foot: 15, hand: 9 }
 
 const rad = d => (d * Math.PI) / 180
 const dir = a => [Math.sin(rad(a)), Math.cos(rad(a))]
@@ -33,6 +33,7 @@ function solve(p) {
   const head = add(sho, p.torso, 6 + L.head)
   const el = add(sho, p.a1, L.ua)
   const ha = add(el, p.a2, L.fa)
+  const wr = p.a3 !== undefined ? add(ha, p.a3, L.hand) : null
   let kn, ft, kn2 = null, ft2 = null, toe = null, toe2 = null
   if (p.feet) {
     ft = p.feet.front; ft2 = p.feet.back
@@ -43,7 +44,7 @@ function solve(p) {
     ft = add(kn, p.sh, L.sh)
     if (p.foot !== undefined) toe = add(ft, p.foot, L.foot)
   }
-  return { hip, sho, head, el, ha, kn, ft, kn2, ft2, toe, toe2 }
+  return { hip, sho, head, el, ha, wr, kn, ft, kn2, ft2, toe, toe2 }
 }
 
 function mix(a, b, t) {
@@ -152,6 +153,11 @@ const DEMOS = {
     b: { hip: [110, 136], torso: 232, th: 135, sh: 15, a1: 120, a2: 125 },
     mat: true, hl: ['torso'],
   },
+  wristcurl: {
+    a: { ...SEAT, torso: 160, a1: 20, a2: 72, a3: 35 },
+    b: { ...SEAT, torso: 160, a1: 20, a2: 72, a3: 150 },
+    seat: true, weight: 'hand', hl: ['arm'],
+  },
   lateralraise: { front: true, hl: ['arm'] },
 }
 
@@ -192,7 +198,8 @@ function Figure({ pose, d, ghost }) {
   const c = name => 'exd-seg' + (hl.includes(name) ? ' hl' : '')
   const footPts = j.toe ? ` ${pt(j.toe)}` : ''
   let weight = null
-  if (!ghost && d.weight === 'hand') weight = <circle className="exd-weight" cx={j.ha[0]} cy={j.ha[1]} r="5" />
+  const tip = j.wr || j.ha
+  if (!ghost && d.weight === 'hand') weight = <circle className="exd-weight" cx={tip[0]} cy={tip[1]} r="5" />
   if (!ghost && d.weight === 'sho') weight = <circle className="exd-weight" cx={j.sho[0]} cy={j.sho[1]} r="6" />
   if (!ghost && d.weight === 'knee') weight = <circle className="exd-weight" cx={j.kn[0]} cy={j.kn[1] - 2} r="6" />
   if (!ghost && d.weight === 'shin') {
@@ -219,7 +226,7 @@ function Figure({ pose, d, ghost }) {
       <polyline className={c('leg')} points={`${pt(pose.hip)} ${pt(j.kn)} ${pt(j.ft)}${footPts}`} />
       <line className={c('torso')} x1={pose.hip[0]} y1={pose.hip[1]} x2={j.sho[0]} y2={j.sho[1]} />
       <circle className="exd-head" cx={j.head[0]} cy={j.head[1]} r={L.head} />
-      <polyline className={c('arm')} points={`${pt(j.sho)} ${pt(j.el)} ${pt(j.ha)}`} />
+      <polyline className={c('arm')} points={`${pt(j.sho)} ${pt(j.el)} ${pt(j.ha)}${j.wr ? ' ' + pt(j.wr) : ''}`} />
       {plate}
       {weight}
     </g>

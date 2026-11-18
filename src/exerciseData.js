@@ -264,6 +264,23 @@ export const EXERCISES = [
     ],
   },
   {
+    id: 'wristcurl',
+    names: ['Handgelenkcurls', 'Handgelenkcurl', 'Wrist Curls', 'Wrist Curl'],
+    demo: 'wristcurl',
+    muscles: 'Unterarm (Handgelenkbeuger)',
+    setup: 'Auf eine Bank oder einen Stuhl setzen. Die Unterarme liegen mit den Handflächen nach oben auf den Oberschenkeln, die Hände ragen über die Knie hinaus. In den Händen eine leichte Kurzhantel oder SZ-Stange.',
+    steps: [
+      'Das Handgelenk nach unten sinken lassen, bis die Finger die Hantel fast loslassen und du eine Dehnung im Unterarm spürst.',
+      'Die Hantel nur mit dem Handgelenk nach oben curlen, so hoch wie möglich.',
+      'Oben kurz anspannen und langsam wieder absenken.',
+    ],
+    tips: [
+      'Die Unterarme bleiben fest auf den Oberschenkeln, nur die Hände bewegen sich.',
+      'Mit leichtem Gewicht und vielen Wiederholungen (12–20) arbeiten.',
+      'Die volle Bewegung nutzen, auch unten in der Dehnung.',
+    ],
+  },
+  {
     id: 'legpress',
     names: ['Beinpresse', 'Leg Press'],
     demo: 'legpress',
