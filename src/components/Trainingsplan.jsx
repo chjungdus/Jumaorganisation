@@ -36,7 +36,7 @@ const EINHEITEN = {
       { name: 'Vertical Row', sets: 3, reps: '8–12' },
       { name: 'Face Pulls', sets: 3, reps: '12–15' },
       { name: 'Bizepscurls', sets: 3, reps: '8–12' },
-      { name: 'Handgelenkcurls', sets: 3, reps: '12–20' },
+      { name: 'Reverse Curls', sets: 3, reps: '12–20' },
     ],
   },
   pullB: {
@@ -46,7 +46,7 @@ const EINHEITEN = {
       { name: 'Kabelrudern', sets: 3, reps: '8–12' },
       { name: 'Reverse Butterfly', sets: 3, reps: '12–15' },
       { name: 'Hammercurls', sets: 3, reps: '10–12' },
-      { name: 'Handgelenkcurls', sets: 3, reps: '12–20' },
+      { name: 'Reverse Curls', sets: 3, reps: '12–20' },
     ],
   },
   legsA: {
