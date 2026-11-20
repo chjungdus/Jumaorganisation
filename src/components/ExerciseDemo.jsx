@@ -133,9 +133,9 @@ const DEMOS = {
     b: { ...SEAT, torso: 188, sh: 92, a1: 15, a2: 70 },
     seat: true, weight: 'shin', hl: ['leg'],
   },
-  lunge: {
-    a: { hip: [99, 88], torso: 180, a1: 0, a2: 0, feet: { front: [140, GROUND], back: [58, GROUND] } },
-    b: { hip: [104, 106], torso: 180, a1: 0, a2: 0, feet: { front: [140, GROUND], back: [58, GROUND] } },
+  gobletsquat: {
+    a: { hip: [104, 71], torso: 178, a1: 12, a2: 160, feet: { front: [106, GROUND], back: [103, GROUND] } },
+    b: { hip: [82, 106], torso: 160, a1: 30, a2: 170, feet: { front: [106, GROUND], back: [103, GROUND] } },
     weight: 'hand', hl: ['leg'],
   },
   calfstanding: {
