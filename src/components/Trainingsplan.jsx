@@ -56,7 +56,7 @@ const EINHEITEN = {
       { name: 'Leg Curl sitzend', sets: 4, reps: '10–12' },
       { name: 'Beinstrecker', sets: 3, reps: '10–15' },
       { name: 'Wadenheben stehend', sets: 4, reps: '8–12' },
-      { name: 'Wadenheben auf der Bank', sets: 4, reps: '10–15' },
+      { name: 'Wadendrücken an der Beinpresse', sets: 4, reps: '10–15' },
     ],
   },
   legsB: {
@@ -64,9 +64,9 @@ const EINHEITEN = {
     exercises: [
       { name: 'Beinpresse', sets: 3, reps: '10–12' },
       { name: 'Leg Curl sitzend', sets: 3, reps: '10–12' },
-      { name: 'Goblet Squats', sets: 2, reps: '10–12' },
+      { name: 'Beinstrecker', sets: 2, reps: '12–15' },
       { name: 'Wadenheben stehend', sets: 4, reps: '10–15' },
-      { name: 'Wadenheben auf der Bank', sets: 3, reps: '12–20' },
+      { name: 'Wadendrücken an der Beinpresse', sets: 3, reps: '12–20' },
     ],
   },
 }

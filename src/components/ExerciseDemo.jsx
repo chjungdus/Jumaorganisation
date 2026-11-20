@@ -143,6 +143,11 @@ const DEMOS = {
     b: { ...STAND, hip: [100, 58], foot: 37, a1: 12, a2: 8 },
     weight: 'sho', hl: ['leg'],
   },
+  calfpress: {
+    a: { hip: [85, 106], torso: 228, th: 116, sh: 120, foot: 210, ...HANDLES_SIDE },
+    b: { hip: [85, 106], torso: 228, th: 116, sh: 120, foot: 150, ...HANDLES_SIDE },
+    seat: 12, plate: true, plateToe: true, hl: ['leg'],
+  },
   calfseated: {
     a: { ...SEAT, torso: 182, foot: 90, a1: 30, a2: 100 },
     b: { ...SEAT, torso: 182, th: 109, foot: 37, a1: 30, a2: 100 },
@@ -211,7 +216,8 @@ function Figure({ pose, d, ghost }) {
     const vx = j.ft[0] - j.hip[0], vy = j.ft[1] - j.hip[1]
     const n = Math.hypot(vx, vy) || 1
     const px = -vy / n, py = vx / n
-    plate = <line className="exd-plate" x1={j.ft[0] - px * 18} y1={j.ft[1] - py * 18} x2={j.ft[0] + px * 18} y2={j.ft[1] + py * 18} />
+    const at = d.plateToe && j.toe ? j.toe : j.ft
+    plate = <line className="exd-plate" x1={at[0] - px * 18} y1={at[1] - py * 18} x2={at[0] + px * 18} y2={at[1] + py * 18} />
   }
   let cable = null
   if (!ghost && d.cable) {
